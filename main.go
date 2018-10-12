@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 type messageHandler struct {
@@ -72,11 +70,19 @@ func PostNoteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	r := mux.NewRouter().StrictSlash(false)
-	r.HandleFunc("/api/notes", GetNoteHandler).Methods("GET")
-	r.HandleFunc("/api/notes", PostNoteHandler).Methods("POST")
+	//r := mux.NewRouter().StrictSlash(false)
+	//r.HandleFunc("/api/notes", GetNoteHandler).Methods("GET")
+	//r.HandleFunc("/api/notes", PostNoteHandler).Methods("POST")
 
-	http.ListenAndServe(":8080", r)
+	mux := http.NewServeMux()
+	fs := http.FileServer(http.Dir("./public"))
+	mux.Handle("/", fs)
+	mux.HandleFunc("/api/notes", GetNoteHandler)
+	//mux.HandleFunc("/api/notes", PostNoteHandler)
+	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
+
+	//http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":8080", mux)
 }
 
 func main2() {
