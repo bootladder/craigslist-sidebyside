@@ -21,19 +21,21 @@ type note struct {
 	Response  string `json:"response"`
 }
 
-func makeRequest(url string) string {
-	resp, err := http.Get(url) //"https://httpbin.org/get"
-	if err != nil {
-		log.Fatalln(err)
-	}
+func main() {
+	router := httprouter.New()
+	router.ServeFiles("/static/*filepath",
+		http.Dir("public"))
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	router.POST("/api/", createPostHandler(""))
 
-	log.Println(string(body))
-	return string(body)
+	browser.OpenURL("http://localhost:8080/static/index.html")
+	http.ListenAndServe(":8080", router)
+}
+
+func createPostHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		postNoteHandler(w, r)
+	}
 }
 
 func postNoteHandler(w http.ResponseWriter, r *http.Request) {
@@ -52,21 +54,19 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
-func createPostHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		postNoteHandler(w, r)
+func makeRequest(url string) string {
+	resp, err := http.Get(url) //"https://httpbin.org/get"
+	if err != nil {
+		log.Fatalln(err)
 	}
-}
 
-func main() {
-	router := httprouter.New()
-	router.ServeFiles("/static/*filepath",
-		http.Dir("public"))
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	router.POST("/api/", createPostHandler(""))
-
-	browser.OpenURL("http://localhost:8080/static/index.html")
-	http.ListenAndServe(":8080", router)
+	log.Println(string(body))
+	return string(body)
 }
 
 func fatal(err error, msgs ...string) {
