@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -15,51 +16,43 @@ import (
 
 var err error
 
-type Note struct {
+type note struct {
 	Hello     string    `json:"hello"`
 	SearchURL string    `json:"searchURL"`
 	CreatedOn time.Time `json:"createdon"`
 }
 
-func createGetHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		GetNoteHandler(w, r)
-	}
-}
 func createPostHandler(msg string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		PostNoteHandler(w, r)
+		postNoteHandler(w, r)
 	}
 }
 
-//HTTP Get - /api/notes
-func GetNoteHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Print("hello\n")
-	var messages []string
-	messages = append(messages, "arr1")
-	messages = append(messages, "arr2")
-	messages = append(messages, "arr3")
-	messages = append(messages, "arr4")
-
-	w.Header().Set("Content-Type", "application/json")
-	j, err := json.Marshal(messages)
+func makeRequest(url string) {
+	resp, err := http.Get(url) //"https://httpbin.org/get"
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(j)
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println(string(body))
 }
 
-//HTTP Post - /api/notes
-func PostNoteHandler(w http.ResponseWriter, r *http.Request) {
+func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 
-	var note Note
+	var note note
 	err := json.NewDecoder(r.Body).Decode(&note)
 	note.CreatedOn = time.Now()
 	note.SearchURL, _ = url.QueryUnescape(note.SearchURL)
 
+	makeRequest(note.SearchURL)
+
 	j, err := json.Marshal(note)
-	Fatal(err)
+	fatal(err)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -69,17 +62,15 @@ func PostNoteHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath",
-		http.Dir("/home/steve/prog/go/src/scratch/stdlib-http-server/public"))
+		http.Dir("public"))
 
 	router.POST("/api/", createPostHandler(""))
 
 	browser.OpenURL("http://localhost:8080/static/index.html")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	http.ListenAndServe(":8080", router)
 }
 
-//Fatal panics on error
-//First parameter of msgs is used each following variadic arg is dropped
-func Fatal(err error, msgs ...string) {
+func fatal(err error, msgs ...string) {
 	if err != nil {
 		var str string
 		for _, msg := range msgs {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -33,7 +34,7 @@ func main1() {
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir("./public"))
 	mux.Handle("/", fs)
-	mux.HandleFunc("/api/notes", GetNoteHandler)
+	mux.HandleFunc("/api/notes", getNoteHandler)
 	//mux.HandleFunc("/api/notes", PostNoteHandler)
 	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
 
@@ -97,4 +98,27 @@ func getCommandOutput(command string, arguments ...string) string {
 
 func getFileContent(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	fmt.Fprintf(w, getCommandOutput("/bin/cat", "/home/steve/prog/go/src/scratch/stdlib-http-server/public/"+params.ByName("name")))
+}
+
+func createGetHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		getNoteHandler(w, r)
+	}
+}
+
+func getNoteHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Print("hello\n")
+	var messages []string
+	messages = append(messages, "arr1")
+	messages = append(messages, "arr2")
+	messages = append(messages, "arr3")
+	messages = append(messages, "arr4")
+
+	w.Header().Set("Content-Type", "application/json")
+	j, err := json.Marshal(messages)
+	if err != nil {
+		panic(err)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(j)
 }
