@@ -3,28 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/pkg/browser"
+	"github.com/pkg/errors"
 )
 
-type messageHandler struct {
-	message string
-}
-
-func (m *messageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, m.message)
-}
-
-func messageHandlerFunc(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "hellomessagefunc")
-}
-
-func createMessageHandlerFunc(msg string) http.Handler {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, msg)
-	})
-}
+var err error
 
 type Note struct {
 	Hello     string    `json:"hello"`
@@ -32,8 +21,20 @@ type Note struct {
 	CreatedOn time.Time `json:"createdon"`
 }
 
+func createGetHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		GetNoteHandler(w, r)
+	}
+}
+func createPostHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		PostNoteHandler(w, r)
+	}
+}
+
 //HTTP Get - /api/notes
 func GetNoteHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Print("hello\n")
 	var messages []string
 	messages = append(messages, "arr1")
 	messages = append(messages, "arr2")
@@ -51,52 +52,44 @@ func GetNoteHandler(w http.ResponseWriter, r *http.Request) {
 
 //HTTP Post - /api/notes
 func PostNoteHandler(w http.ResponseWriter, r *http.Request) {
+
 	var note Note
-	// Decode the incoming Note json
 	err := json.NewDecoder(r.Body).Decode(&note)
-	if err != nil {
-		panic(err)
-	}
 	note.CreatedOn = time.Now()
-	//	k := strconv.Itoa(id)
-	//	noteStore[k] = note
+	note.SearchURL, _ = url.QueryUnescape(note.SearchURL)
+
 	j, err := json.Marshal(note)
-	if err != nil {
-		panic(err)
-	}
+	Fatal(err)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(j)
 }
 
 func main() {
-	//r := mux.NewRouter().StrictSlash(false)
-	//r.HandleFunc("/api/notes", GetNoteHandler).Methods("GET")
-	//r.HandleFunc("/api/notes", PostNoteHandler).Methods("POST")
+	router := httprouter.New()
+	router.ServeFiles("/static/*filepath",
+		http.Dir("/home/steve/prog/go/src/scratch/stdlib-http-server/public"))
 
-	mux := http.NewServeMux()
-	fs := http.FileServer(http.Dir("./public"))
-	mux.Handle("/", fs)
-	mux.HandleFunc("/api/notes", GetNoteHandler)
-	//mux.HandleFunc("/api/notes", PostNoteHandler)
-	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
+	router.POST("/api/", createPostHandler(""))
 
-	//http.ListenAndServe(":8080", r)
-	http.ListenAndServe(":8080", mux)
+	browser.OpenURL("http://localhost:8080/static/index.html")
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func main2() {
-	mux := http.NewServeMux()
-	fs := http.FileServer(http.Dir("public"))
-	mux.Handle("/", fs)
-	mux.Handle("/welcome", &messageHandler{"hello123"})
+//Fatal panics on error
+//First parameter of msgs is used each following variadic arg is dropped
+func Fatal(err error, msgs ...string) {
+	if err != nil {
+		var str string
+		for _, msg := range msgs {
+			str = msg
+			break
+		}
+		panic(errors.Wrap(err, str))
+	}
+}
 
-	mux.Handle("/func", http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintf(w, "super lambda2")
-		}))
-
-	mux.Handle("/closure", createMessageHandlerFunc("my closure thing"))
-
-	http.ListenAndServe(":8080", mux)
+func printf(s string, a ...interface{}) {
+	fmt.Printf(s, a)
 }

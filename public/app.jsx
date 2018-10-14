@@ -23,14 +23,18 @@ class CraigslistQueryColumn extends React.Component {
 
     const myURL="https://detroit.craigslist.org/d/architect-engineer-cad/search/egr"
 
-    //fetch("http://localhost:8080/api/" + encodeURIComponent(myURL), {
-    fetch("http://localhost:8080/api" , {
+    var myObj = {
+      searchURL: encodeURIComponent(myURL),
+      lastName:"Doe", age:50, eyeColor:"blue"
+    };
+
+    fetch("http://localhost:8080/api/" , {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         method: "POST",
-        body: {"searchURL":"myvalue321432"}
+        body: JSON.stringify(myObj)
     })
     .then(response => response.json())
     .then(data =>
