@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/browser"
@@ -17,18 +16,12 @@ import (
 var err error
 
 type note struct {
-	Hello     string    `json:"hello"`
-	SearchURL string    `json:"searchURL"`
-	CreatedOn time.Time `json:"createdon"`
+	Hello     string `json:"hello"`
+	SearchURL string `json:"searchURL"`
+	Response  string `json:"response"`
 }
 
-func createPostHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		postNoteHandler(w, r)
-	}
-}
-
-func makeRequest(url string) {
+func makeRequest(url string) string {
 	resp, err := http.Get(url) //"https://httpbin.org/get"
 	if err != nil {
 		log.Fatalln(err)
@@ -40,16 +33,16 @@ func makeRequest(url string) {
 	}
 
 	log.Println(string(body))
+	return string(body)
 }
 
 func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 
 	var note note
 	err := json.NewDecoder(r.Body).Decode(&note)
-	note.CreatedOn = time.Now()
 	note.SearchURL, _ = url.QueryUnescape(note.SearchURL)
 
-	makeRequest(note.SearchURL)
+	note.Response = makeRequest(note.SearchURL)
 
 	j, err := json.Marshal(note)
 	fatal(err)
@@ -57,6 +50,12 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(j)
+}
+
+func createPostHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		postNoteHandler(w, r)
+	}
 }
 
 func main() {
