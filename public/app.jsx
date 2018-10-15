@@ -1,10 +1,40 @@
-class CraigslistResults extends React.Component {
+class CraigslistQueryColumnResults extends React.Component {
+
   render() {
+    const html = $.parseHTML( this.props.results ) //console.log(html.html)
+    
+    //const b = $(html).find(".result-row").length; console.log(b)
+    //const z = $(html).find(".result-row").html()
+      
+    var resultRows = []
+    var i=0
+    $(html).find(".result-row").each( function(q) {
+        //console.log(this.innerHTML)
+        i++
+        resultRows.push(React.createElement(
+            'div', {key: i}, <div dangerouslySetInnerHTML= {{__html: this.innerHTML}} />
+        ))
+    })
+
+    var stations = [];
+    var i
+    for(i=0; i<4; i++){
+      stations.push(
+          <div key={i} className="station">
+              Call: {i}, Freq: {i} <br/>
+          </div>
+      )
+    }
+
     return (
-    <div>{this.props.hello}</div>
+      <div>
+            <div className="stations">{stations}</div>
+            <div className="hello">{resultRows}</div>
+      </div>
     );
   }
 }
+
 class CraigslistQueryColumn extends React.Component {
   state = {
     message: "initial state",
@@ -40,6 +70,7 @@ class CraigslistQueryColumn extends React.Component {
     .then(data =>
       this.setState({
         users: data,
+        craigslistQueryResponse: data.response,
         message: "ok!!",
       })
     )
@@ -54,8 +85,11 @@ class CraigslistQueryColumn extends React.Component {
         </form> 
         <button />
         <input value={37} onChange={this.handleChange} />
-        <div> {JSON.stringify(this.state.users)} and , {JSON.stringify(this.state.message)}</div>
-        <CraigslistResults hello="hello" />
+        <div> 
+          {JSON.stringify(this.state.message)}
+        </div>
+        <CraigslistQueryColumnResults hello="hello" results={this.state.craigslistQueryResponse}
+              myprop="<b>zwatef</b>"/>
       </div>
     );
   }
