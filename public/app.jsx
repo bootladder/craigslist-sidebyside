@@ -50,81 +50,116 @@ class CraigslistQueryColumnUserInput extends React.Component {
 }
 
 class CraigslistQueryColumn extends React.Component {
-  state = {
-    message: "initial state",
-    users: [],
-    error: null
-  }
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-  }
-  handleChange(e) {
-    this.props.onInputEvent(e.target.value);
-  }
+    state = {
+        message: "initial state",
+        users: [],
+        error: null
+    }
+    constructor(props) {
+      super(props);
+      this.handleChange = this.handleChange.bind(this);
+    }
+    handleChange(e) {
+        this.props.onInputEvent(e.target.value);
+    }
 
-  buttonClicked(e) {
-      console.log("button clicked" + e)
-  }
+    buttonClicked(e) {
+        console.log("button clicked" + e)
+    }
 
-  componentDidMount() {
+    componentDidMount() {
 
-    const myURL="https://detroit.craigslist.org/d/architect-engineer-cad/search/egr"
+        const myURL="https://detroit.craigslist.org/d/architect-engineer-cad/search/egr"
 
-    var myObj = {
-      searchURL: encodeURIComponent(myURL),
-    };
+        var myObj = {
+            searchURL: encodeURIComponent(myURL),
+        };
 
-    fetch("http://localhost:8080/api/" , {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: "POST",
-        body: JSON.stringify(myObj)
-    })
-    .then(response => response.json())
-    .then(data =>
-      this.setState({
-        users: data,
-        craigslistQueryResponse: data.response,
-        message: "ok!!",
-      })
-    )
-    .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
-  }
+        fetch("http://localhost:8080/api/" , {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: JSON.stringify(myObj)
+        })
+        .then(response => response.json())
+        .then(data =>
+            this.setState({
+                users: data,
+                craigslistQueryResponse: data.response,
+                message: "ok!!",
+          })
+        )
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
+    }
 
-  render() {
-      return (
-          <div>
-              <CraigslistQueryColumnUserInput 
-                  buttonClicked={this.buttonClicked}
-                  handleChange={this.handleChange}/>
-              <div> 
-                  The Message is: {JSON.stringify(this.state.message)}
-              </div>
-              <CraigslistQueryColumnResults 
-                    results={this.state.craigslistQueryResponse}
-                    hello="hello" 
-                    myprop="<b>zwatef</b>"
-              />
-          </div>
-      );
-  }
+    render() {
+        return (
+            <div>
+                <CraigslistQueryColumnUserInput 
+                    buttonClicked={this.buttonClicked}
+                    handleChange={this.handleChange}/>
+                <div> 
+                    The Message is: {JSON.stringify(this.state.message)}
+                </div>
+                <CraigslistQueryColumnResults 
+                      results={this.state.craigslistQueryResponse}
+                      hello="hello" 
+                      myprop="<b>zwatef</b>"
+                />
+            </div>
+        );
+    }
 }
 
 class App extends React.Component {
-  handleQueryInput(e) {
-    console.log("hello"+e)
-  }
-  render() {
-    return (
-      <div>
-        <h1>Hello JSX and the World!</h1>
-        <CraigslistQueryColumn onInputEvent={this.handleQueryInput}/>
-      </div>
-    );
-  }
+    handleQueryInput(e) {
+        console.log("hello"+e)
+          }
+          render() {
+              return (
+                  <div>
+                      <h1>This is the App</h1>
+                      <hr/>
+                      <div className="search-table-outter wrapper">
+                          <table className="search-table inner">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <div>
+                                  craigslist-fetch/result/result1
+                                    <CraigslistQueryColumn 
+                                        onInputEvent={this.handleQueryInput}
+                                    />
+                                </div>
+                              </td> 
+                              <td>
+                                <div>
+                                  craigslist-fetch/result/result2
+                                    <CraigslistQueryColumn 
+                                        onInputEvent={this.handleQueryInput}
+                                    />
+                                </div>
+                              </td>
+                              <td>
+                                <div>
+                                  craigslist-fetch/result/result2
+                                    <CraigslistQueryColumn 
+                                        onInputEvent={this.handleQueryInput}
+                                    />
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                          </table>
+                      </div>
+
+
+                <CraigslistQueryColumn onInputEvent={this.handleQueryInput}/>
+            </div>
+        );
+    }
 }
 
 ReactDOM.render(<App />, document.getElementById('app'));
