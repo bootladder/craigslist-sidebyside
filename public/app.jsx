@@ -35,6 +35,20 @@ class CraigslistQueryColumnResults extends React.Component {
   }
 }
 
+class CraigslistQueryColumnUserInput extends React.Component {
+  render() {
+      return (
+          <div>
+              URL: <input type="text" name="url"/><br/>
+              <button onClick={this.props.buttonClicked} /> <br />
+
+              <input value={37} onChange={this.props.handleChange} /> <br />
+              hello ocomponent
+          </div>
+      );
+  }
+}
+
 class CraigslistQueryColumn extends React.Component {
   state = {
     message: "initial state",
@@ -49,13 +63,16 @@ class CraigslistQueryColumn extends React.Component {
     this.props.onInputEvent(e.target.value);
   }
 
+  buttonClicked(e) {
+      console.log("button clicked" + e)
+  }
+
   componentDidMount() {
 
     const myURL="https://detroit.craigslist.org/d/architect-engineer-cad/search/egr"
 
     var myObj = {
       searchURL: encodeURIComponent(myURL),
-      lastName:"Doe", age:50, eyeColor:"blue"
     };
 
     fetch("http://localhost:8080/api/" , {
@@ -78,20 +95,21 @@ class CraigslistQueryColumn extends React.Component {
   }
 
   render() {
-    return (
-      <div>
-        <form action="/action_page.php">
-          URL: <input type="text" name="url"/><br/>
-        </form> 
-        <button />
-        <input value={37} onChange={this.handleChange} />
-        <div> 
-          {JSON.stringify(this.state.message)}
-        </div>
-        <CraigslistQueryColumnResults hello="hello" results={this.state.craigslistQueryResponse}
-              myprop="<b>zwatef</b>"/>
-      </div>
-    );
+      return (
+          <div>
+              <CraigslistQueryColumnUserInput 
+                  buttonClicked={this.buttonClicked}
+                  handleChange={this.handleChange}/>
+              <div> 
+                  The Message is: {JSON.stringify(this.state.message)}
+              </div>
+              <CraigslistQueryColumnResults 
+                    results={this.state.craigslistQueryResponse}
+                    hello="hello" 
+                    myprop="<b>zwatef</b>"
+              />
+          </div>
+      );
   }
 }
 
