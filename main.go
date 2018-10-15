@@ -16,7 +16,6 @@ import (
 var err error
 
 type note struct {
-	Hello     string `json:"hello"`
 	SearchURL string `json:"searchURL"`
 	Response  string `json:"response"`
 }
