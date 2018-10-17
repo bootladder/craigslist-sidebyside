@@ -1,3 +1,9 @@
+let Appbar = mui.react.Appbar,
+  Button = mui.react.Button,
+  Container = mui.react.Container,
+  Row = mui.react.Row,
+  Col = mui.react.Col;
+
 class CraigslistQueryColumnResults extends React.Component {
 
   render() {
@@ -39,8 +45,24 @@ class CraigslistQueryColumnUserInput extends React.Component {
   render() {
       return (
           <div>
+            <Container fluid={true}>
+                <Row>
+                    <Col xs="4">md-1</Col>
+                    <Col xs="4">md-1</Col>
+                    <Col xs="4">md-1</Col>
+                    <Col xs="4">md-1</Col>
+                </Row>
+                <Row>
+                    <Col xs="1">md-1</Col>
+                    <Col xs="1">md-1</Col>
+                    <Col xs="1">md-1</Col>
+                    <Col xs="1">md-1</Col>
+                </Row>
+            </Container>
               URL: <input type="text" name="url"/><br/>
               <button onClick={this.props.buttonClicked} /> <br />
+                <Button color="primary">button</Button>
+                <Button color="primary">button</Button>
 
               <input value={37} onChange={this.props.handleChange} /> <br />
               hello ocomponent
@@ -97,17 +119,19 @@ class CraigslistQueryColumn extends React.Component {
     render() {
         return (
             <div>
-                <CraigslistQueryColumnUserInput 
-                    buttonClicked={this.buttonClicked}
-                    handleChange={this.handleChange}/>
-                <div> 
-                    The Message is: {JSON.stringify(this.state.message)}
+                <div className="mui--text-center">
+                    <CraigslistQueryColumnUserInput 
+                        buttonClicked={this.buttonClicked}
+                        handleChange={this.handleChange}/>
                 </div>
-                <CraigslistQueryColumnResults 
-                      results={this.state.craigslistQueryResponse}
-                      hello="hello" 
-                      myprop="<b>zwatef</b>"
-                />
+                    <div> 
+                        The Message is: {JSON.stringify(this.state.message)}
+                    </div>
+                    <CraigslistQueryColumnResults 
+                        results={this.state.craigslistQueryResponse}
+                        hello="hello" 
+                        myprop="<b>zwatef</b>"
+                    />
             </div>
         );
     }
@@ -150,13 +174,42 @@ class App extends React.Component {
                                     />
                                 </div>
                               </td>
+                              <td>
+                                <div>
+                                  craigslist-fetch/result/result2
+                                    <CraigslistQueryColumn 
+                                        onInputEvent={this.handleQueryInput}
+                                    />
+                                </div>
+                              </td>
+                              <td>
+                                <div>
+                                  craigslist-fetch/result/result2
+                                    <CraigslistQueryColumn 
+                                        onInputEvent={this.handleQueryInput}
+                                    />
+                                </div>
+                              </td>
+                              <td>
+                                <div>
+                                  craigslist-fetch/result/result2
+                                    <CraigslistQueryColumn 
+                                        onInputEvent={this.handleQueryInput}
+                                    />
+                                </div>
+                              </td>
+                              <td>
+                                <div>
+                                  craigslist-fetch/result/result2
+                                    <CraigslistQueryColumn 
+                                        onInputEvent={this.handleQueryInput}
+                                    />
+                                </div>
+                              </td>
                             </tr>
                           </tbody>
                           </table>
                       </div>
-
-
-                <CraigslistQueryColumn onInputEvent={this.handleQueryInput}/>
             </div>
         );
     }
