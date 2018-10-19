@@ -1,73 +1,52 @@
-let Appbar = mui.react.Appbar,
-  Button = mui.react.Button,
-  Container = mui.react.Container,
-  Row = mui.react.Row,
-  Col = mui.react.Col;
+let Appbar = mui.react.Appbar;
+let Button = mui.react.Button;
+let Container = mui.react.Container;
+let Row = mui.react.Row;
+let Col = mui.react.Col;
+let Input = mui.react.Input;
+
+class CraigslistQueryColumnUserInput extends React.Component {
+    constructor(props) {
+      super(props);
+      this.buttonClicked = this.buttonClicked.bind(this);
+    }
+    buttonClicked(){
+
+        console.log("button clicked")
+        this.props.buttonClicked()
+    }
+  render() {
+      return (
+          <div>
+            <Container fluid={true}>
+                <Input placeholder="Craigslist Search URL" />
+                <Button onClick={this.buttonClicked} size="small" color="primary">Load</Button>
+                <Button size="small" color="primary">Save</Button>
+            </Container>
+          </div>
+      );
+  }
+}
 
 class CraigslistQueryColumnResults extends React.Component {
 
   render() {
-    const html = $.parseHTML( this.props.results ) //console.log(html.html)
-    
-    //const b = $(html).find(".result-row").length; console.log(b)
-    //const z = $(html).find(".result-row").html()
+    const html = $.parseHTML( this.props.results )
       
     var resultRows = []
     var i=0
     $(html).find(".result-row").each( function(q) {
-        //console.log(this.innerHTML)
         i++
         resultRows.push(React.createElement(
             'div', {key: i}, <div dangerouslySetInnerHTML= {{__html: this.innerHTML}} />
         ))
     })
 
-    var stations = [];
-    var i
-    for(i=0; i<4; i++){
-      stations.push(
-          <div key={i} className="station">
-              Call: {i}, Freq: {i} <br/>
-          </div>
-      )
-    }
-
     return (
       <div>
-            <div className="stations">{stations}</div>
-            <div className="hello">{resultRows}</div>
+        <div className="hello">{resultRows}</div>
       </div>
     );
-  }
-}
-
-class CraigslistQueryColumnUserInput extends React.Component {
-  render() {
-      return (
-          <div>
-            <Container fluid={true}>
-                <Row>
-                    <Col xs="4">md-1</Col>
-                    <Col xs="4">md-1</Col>
-                    <Col xs="4">md-1</Col>
-                    <Col xs="4">md-1</Col>
-                </Row>
-                <Row>
-                    <Col xs="1">md-1</Col>
-                    <Col xs="1">md-1</Col>
-                    <Col xs="1">md-1</Col>
-                    <Col xs="1">md-1</Col>
-                </Row>
-            </Container>
-              URL: <input type="text" name="url"/><br/>
-              <button onClick={this.props.buttonClicked} /> <br />
-                <Button color="primary">button</Button>
-                <Button color="primary">button</Button>
-
-              <input value={37} onChange={this.props.handleChange} /> <br />
-              hello ocomponent
-          </div>
-      );
   }
 }
 
@@ -80,17 +59,13 @@ class CraigslistQueryColumn extends React.Component {
     constructor(props) {
       super(props);
       this.handleChange = this.handleChange.bind(this);
+      this.doRequest = this.doRequest.bind(this);
     }
     handleChange(e) {
-        this.props.onInputEvent(e.target.value);
+        this.props.handleChange(e.target.value);
     }
-
-    buttonClicked(e) {
-        console.log("button clicked" + e)
-    }
-
-    componentDidMount() {
-
+    doRequest(e) {
+        console.log("dorequest)")
         const myURL="https://detroit.craigslist.org/d/architect-engineer-cad/search/egr"
 
         var myObj = {
@@ -113,16 +88,28 @@ class CraigslistQueryColumn extends React.Component {
                 message: "ok!!",
           })
         )
-        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
+        ;
+    }
+
+    buttonClicked(e) {
+        console.log("column button clicked" + e)
+        this.doRequest()
+    }
+
+    componentDidMount() {
+        this.doRequest()
     }
 
     render() {
         return (
             <div>
-                <div className="mui--text-center">
+                <div className="mui--text-left">
                     <CraigslistQueryColumnUserInput 
                         buttonClicked={this.buttonClicked}
-                        handleChange={this.handleChange}/>
+                        handleChange={this.handleChange}
+                        doRequest={this.doRequest}
+                        />
                 </div>
                     <div> 
                         The Message is: {JSON.stringify(this.state.message)}
@@ -140,76 +127,31 @@ class CraigslistQueryColumn extends React.Component {
 class App extends React.Component {
     handleQueryInput(e) {
         console.log("hello"+e)
-          }
-          render() {
-              return (
-                  <div>
-                      <h1>This is the App</h1>
-                      <hr/>
-                      <div className="search-table-outter wrapper">
-                          <table className="search-table inner">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <div>
-                                  craigslist-fetch/result/result1
-                                    <CraigslistQueryColumn 
-                                        onInputEvent={this.handleQueryInput}
-                                    />
-                                </div>
-                              </td> 
-                              <td>
-                                <div>
-                                  craigslist-fetch/result/result2
-                                    <CraigslistQueryColumn 
-                                        onInputEvent={this.handleQueryInput}
-                                    />
-                                </div>
-                              </td>
-                              <td>
-                                <div>
-                                  craigslist-fetch/result/result2
-                                    <CraigslistQueryColumn 
-                                        onInputEvent={this.handleQueryInput}
-                                    />
-                                </div>
-                              </td>
-                              <td>
-                                <div>
-                                  craigslist-fetch/result/result2
-                                    <CraigslistQueryColumn 
-                                        onInputEvent={this.handleQueryInput}
-                                    />
-                                </div>
-                              </td>
-                              <td>
-                                <div>
-                                  craigslist-fetch/result/result2
-                                    <CraigslistQueryColumn 
-                                        onInputEvent={this.handleQueryInput}
-                                    />
-                                </div>
-                              </td>
-                              <td>
-                                <div>
-                                  craigslist-fetch/result/result2
-                                    <CraigslistQueryColumn 
-                                        onInputEvent={this.handleQueryInput}
-                                    />
-                                </div>
-                              </td>
-                              <td>
-                                <div>
-                                  craigslist-fetch/result/result2
-                                    <CraigslistQueryColumn 
-                                        onInputEvent={this.handleQueryInput}
-                                    />
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                          </table>
-                      </div>
+    }
+    doRequest(){
+        console.log("app do request")
+    }
+    render() {
+        return (
+            <div>
+                <h1>This is the App</h1>
+                <hr/>
+                <div className="search-table-outter wrapper">
+                    <table className="search-table inner">
+                        <tbody>
+                    <tr>
+                <td>
+            <div>
+                <CraigslistQueryColumn 
+                    handleChange={this.handleQueryInput} 
+                    doRequest={this.doRequest} 
+                    />
+            </div>
+                </td> 
+                    </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         );
     }
