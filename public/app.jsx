@@ -10,15 +10,16 @@ class App extends React.Component {
     saveColumnInfo(e) {
         console.log("App saveColumnInfo")
     }
-    doRequest(){
-        console.log("app do request")
+    doRequest(craigslistSearchURL){
+        console.log("app do request" + craigslistSearchURL)
         this.setState({
                 dummystate: "changeddummystate"
         })
-        const myURL="https://detroit.craigslist.org/d/architect-engineer-cad/search/egr"
+        const myURL="https://newyork.craigslist.org/d/architect-engineer-cad/search/egr"
 
         var myObj = {
-            searchURL: encodeURIComponent(myURL),
+            searchURL: encodeURIComponent(craigslistSearchURL),
+            hardsearchURL: encodeURIComponent(myURL),
         };
 
         fetch("http://localhost:8080/api/" , {
