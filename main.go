@@ -15,6 +15,18 @@ import (
 
 var err error
 
+type craigslistRequest struct {
+	SearchURL string `json:"searchURL"`
+}
+
+type craigslistResponse struct {
+	ResponseHTML string `json:"response"`
+}
+
+type getUrlsResponse struct {
+	Urls []string `json:"urls"`
+}
+
 type note struct {
 	SearchURL string `json:"searchURL"`
 	Response  string `json:"response"`
@@ -26,6 +38,7 @@ func main() {
 		http.Dir("public"))
 
 	router.POST("/api/", createPostHandler(""))
+	router.GET("/api/", createGetHandler(""))
 
 	browser.OpenURL("http://localhost:8080/static/index.html")
 	http.ListenAndServe(":8080", router)
@@ -46,6 +59,29 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	note.Response = makeRequest(note.SearchURL)
 
 	j, err := json.Marshal(note)
+	fatal(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(j)
+}
+
+func createGetHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		getNoteHandler(w, r)
+	}
+}
+
+func getNoteHandler(w http.ResponseWriter, r *http.Request) {
+
+	var resp getUrlsResponse
+	var urls []string
+	urls = append(urls, "hello1")
+	urls = append(urls, "hello2")
+	urls = append(urls, "hello3")
+	resp.Urls = urls
+
+	j, err := json.Marshal(resp)
 	fatal(err)
 
 	w.Header().Set("Content-Type", "application/json")

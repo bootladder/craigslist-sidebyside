@@ -26,7 +26,12 @@ class CraigslistQueryColumnUserInput extends React.Component {
         console.log("savebuttonclicked userinput" + this.props.hello)
         alert("1" + this.input.controlEl.value);
     }
+
+    componentDidMount(){
+        this.props.doRequest(this.props.url)
+    }
     render() {
+        console.log("my url is: " + this.props.url)
         return (
             <div>
                 <Container fluid={true}>
@@ -68,7 +73,7 @@ class CraigslistQueryColumn extends React.Component {
     }
 
     componentDidMount() {
-        this.props.doRequest("https://newyork.craigslist.org/d/architect-engineer-cad/search/egr")
+//        this.props.doRequest("https://newyork.craigslist.org/d/architect-engineer-cad/search/egr")
     }
 
     render() {
@@ -77,7 +82,7 @@ class CraigslistQueryColumn extends React.Component {
                 <div className="mui--text-left">
                     <CraigslistQueryColumnUserInput 
                         doRequest={this.props.doRequest}
-                        hello="hello123"
+                        url={this.props.url}
                         />
                 </div>
                 <CraigslistQueryColumnResults 
