@@ -11,13 +11,20 @@ class CraigslistQueryColumnUserInput extends React.Component {
         this.loadButtonClicked = this.loadButtonClicked.bind(this);
         this.saveButtonClicked = this.saveButtonClicked.bind(this);
     }
+    validateCraigslistURL(url){
+        if(url.length < 5){
+            console.log("length too short, defaulting URL")
+            return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
+        }
+        else return url;
+    }
     loadButtonClicked(){
-        this.props.doRequest("https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr")
-        alert("2" + this.input.controlEl.value);
+        const url = this.validateCraigslistURL(this.input.controlEl.value)
+        this.props.doRequest(url)
     }
     saveButtonClicked(){
-       console.log("savebuttonclicked userinput" + this.props.hello)
-       alert(this.refs.myField.getValue())
+        console.log("savebuttonclicked userinput" + this.props.hello)
+        alert("1" + this.input.controlEl.value);
     }
     render() {
         return (
@@ -65,7 +72,6 @@ class CraigslistQueryColumn extends React.Component {
     }
 
     render() {
-        console.log("rendinerg columnwith response data " + this.props.queryResponseData )
         return (
             <div>
                 <div className="mui--text-left">
