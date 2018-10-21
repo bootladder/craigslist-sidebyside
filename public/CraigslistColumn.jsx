@@ -11,15 +11,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
         this.loadButtonClicked = this.loadButtonClicked.bind(this);
         this.saveButtonClicked = this.saveButtonClicked.bind(this);
     }
-    validateCraigslistURL(url){
-        if(url.length < 5){
-            console.log("length too short, defaulting URL")
-            return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
-        }
-        else return url;
-    }
     loadButtonClicked(){
-        const url = this.validateCraigslistURL(this.input.controlEl.value)
         this.props.doRequest(url)
     }
     saveButtonClicked(){
@@ -28,7 +20,8 @@ class CraigslistQueryColumnUserInput extends React.Component {
     }
 
     componentDidMount(){
-        this.props.doRequest(this.props.url)
+        this.props.doRequest(this.input.controlEl.value)
+        console.log("column doRequest with: "+this.props.url)
     }
     render() {
         console.log("my url is: " + this.props.url)

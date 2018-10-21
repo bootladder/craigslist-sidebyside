@@ -1,4 +1,3 @@
-
 class App extends React.Component {
     constructor(props) {
       super(props);
@@ -19,17 +18,48 @@ class App extends React.Component {
         })
         .then(response => response.json())
         .then(data =>
-            this.setState({
-                craigslistUrlsResponse: data.urls,
-          })
+            this.updateUrls(data.urls)
         )
         .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
         ;
     }
+    updateUrls(urls) {
+        console.log("updateUrls: "+ urls)
+        let children = []
+        for (let j = 0; j < 3; j++) {
+            children.push(
+<td>
+    <div>
+        <CraigslistQueryColumn 
+            saveColumnInfo={this.saveColumnInfo} 
+            doRequest={this.doRequest} 
+            queryResponseData={this.state.craigslistQueryResponse} 
+            url={urls[j]}
+            />
+    </div>
+</td> 
+            )
+        }
+
+            this.setState({
+                craigslistUrlsResponse: urls,
+                children: children
+          })
+
+    }
     saveColumnInfo(e) {
         console.log("App saveColumnInfo")
     }
+
+    validateCraigslistURL(url){
+        if(url.length < 5){
+            console.log("length too short, defaulting URL")
+            return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
+        }
+        else return url;
+    }
     doRequest(craigslistSearchURL){
+        craigslistSearchURL = this.validateCraigslistURL(craigslistSearchURL)
         console.log("app do request" + craigslistSearchURL)
 
         var myJsonRequestObj = {
@@ -57,8 +87,9 @@ class App extends React.Component {
         ;
     }
     render() {
-        console.log("rendering app with state " + this.state)
+        console.log("rendering app with state " + JSON.stringify(this.state))
         console.log("rendering app with urls " + JSON.stringify(this.state.craigslistUrlsResponse))
+
         return (
             <div>
                 <h1>This is the App</h1>
@@ -67,16 +98,7 @@ class App extends React.Component {
                 <table className="search-table inner">
             <tbody>
         <tr>
-    <td>
-<div>
-    <CraigslistQueryColumn 
-        saveColumnInfo={this.saveColumnInfo} 
-        doRequest={this.doRequest} 
-        queryResponseData={this.state.craigslistQueryResponse} 
-        url="https://newyork.craigslist.org/d/architect-engineer-cad/search/egr"
-        />
-</div>
-    </td> 
+            {this.state.children}
         </tr>
             </tbody>
                 </table>
