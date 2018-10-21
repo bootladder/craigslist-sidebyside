@@ -54,6 +54,7 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func makeRequest(url string) string {
+	log.Println("makeRequest: " + url)
 	resp, err := http.Get(url) //"https://httpbin.org/get"
 	if err != nil {
 		log.Fatalln(err)
@@ -64,7 +65,7 @@ func makeRequest(url string) string {
 		log.Fatalln(err)
 	}
 
-	log.Println(string(body))
+	//log.Println(string(body))
 	return string(body)
 }
 
