@@ -9,18 +9,21 @@ class CraigslistQueryColumnUserInput extends React.Component {
     constructor(props) {
         super(props);
         this.loadButtonClicked = this.loadButtonClicked.bind(this);
+        this.saveButtonClicked = this.saveButtonClicked.bind(this);
     }
     loadButtonClicked(){
-        this.props.doRequest()
+        this.props.doRequest("https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr")
+        alert("2" + this.input.controlEl.value);
     }
     saveButtonClicked(){
-        console.log("savebuttonclicked userinput" + this.props.hello)
+       console.log("savebuttonclicked userinput" + this.props.hello)
+       alert(this.refs.myField.getValue())
     }
     render() {
         return (
             <div>
                 <Container fluid={true}>
-                    <Input placeholder="Craigslist Search URL" />
+                    <Input ref={el => { this.input = el; }} placeholder="Craigslist Search URL" />
                     <Button onClick={this.loadButtonClicked} size="small" color="primary">Load</Button>
                     <Button onClick={this.saveButtonClicked} size="small" color="primary">Save</Button>
                 </Container>
@@ -58,7 +61,7 @@ class CraigslistQueryColumn extends React.Component {
     }
 
     componentDidMount() {
-        this.props.doRequest()
+        this.props.doRequest("https://newyork.craigslist.org/d/architect-engineer-cad/search/egr")
     }
 
     render() {
