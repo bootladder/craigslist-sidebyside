@@ -12,7 +12,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
         this.saveButtonClicked = this.saveButtonClicked.bind(this);
     }
     loadButtonClicked(){
-        this.props.doRequest(url)
+        this.props.doRequest(this.input.controlEl.value)
     }
     saveButtonClicked(){
         console.log("savebuttonclicked userinput" + this.props.hello)
@@ -20,6 +20,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
     }
 
     componentDidMount(){
+        this.input.controlEl.value = this.props.url
         this.props.doRequest(this.props.url)
         console.log("column doRequest with: "+this.props.url)
     }
