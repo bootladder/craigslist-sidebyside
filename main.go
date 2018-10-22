@@ -76,9 +76,9 @@ func getNoteHandler(w http.ResponseWriter, r *http.Request) {
 
 	var resp getUrlsResponse
 	var urls []string
-	urls = append(urls, "hello1")
-	urls = append(urls, "hello2")
-	urls = append(urls, "hello3")
+	urls = append(urls, "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr")
+	urls = append(urls, "https://seattle.craigslist.org/d/architect-engineer-cad/search/egr")
+	urls = append(urls, "https://denver.craigslist.org/d/architect-engineer-cad/search/egr")
 	resp.Urls = urls
 
 	j, err := json.Marshal(resp)

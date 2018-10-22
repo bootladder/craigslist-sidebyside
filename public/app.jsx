@@ -1,17 +1,19 @@
 class App extends React.Component {
     constructor(props) {
       super(props);
-      this.doRequest = this.doRequest.bind(this);
       this.getCraigslistUrls = this.getCraigslistUrls.bind(this);
     }
     state = {
-        dummystate: "initial dummy state"
+        dummystate: "initial dummy state",
+        urls: [],
+        children: <td>hello</td>
     }
     componentDidMount(){
+        console.log("app mounted")
         this.getCraigslistUrls()
     }
     getCraigslistUrls(){
-        console.log("get craigslistURLS")
+        console.log("     get craigslistURLS")
 
         fetch("http://localhost:8080/api/" , {
             method: "GET"
@@ -20,19 +22,27 @@ class App extends React.Component {
         .then(data =>
             this.updateUrls(data.urls)
         )
-        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
-        ;
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
     }
     updateUrls(urls) {
-        console.log("updateUrls: "+ urls)
+        console.log("     updateUrls: "+ urls)
+        var c = this.makeChildren(urls)
+        this.setState({
+            urls: urls,
+            children: c
+        })
+    }
+
+    makeChildren(urls) {
+        console.log("     makeChildren: making "+urls.length+"chilrden")
+
         let children = []
-        for (let j = 0; j < 3; j++) {
+        for (let j = 0; j < urls.length; j++) {
             children.push(
-<td>
+<td key={j}>
     <div>
         <CraigslistQueryColumn 
             saveColumnInfo={this.saveColumnInfo} 
-            doRequest={this.doRequest} 
             queryResponseData={this.state.craigslistQueryResponse} 
             url={urls[j]}
             />
@@ -40,55 +50,14 @@ class App extends React.Component {
 </td> 
             )
         }
-
-            this.setState({
-                craigslistUrlsResponse: urls,
-                children: children
-          })
-
+        return children
     }
     saveColumnInfo(e) {
         console.log("App saveColumnInfo")
     }
-
-    validateCraigslistURL(url){
-        if(url.length < 5){
-            console.log("length too short, defaulting URL")
-            return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
-        }
-        else return url;
-    }
-    doRequest(craigslistSearchURL){
-        craigslistSearchURL = this.validateCraigslistURL(craigslistSearchURL)
-        console.log("app do request" + craigslistSearchURL)
-
-        var myJsonRequestObj = {
-            searchURL: encodeURIComponent(craigslistSearchURL),
-        };
-
-        fetch("http://localhost:8080/api/" , {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method: "POST",
-            body: JSON.stringify(myJsonRequestObj)
-        })
-        .then(response => response.json())
-        .then(data =>
-            this.setState({
-                users: data,
-                craigslistQueryResponse: data.response,
-                message: "ok!!",
-                dummystate: "ok finally changed state up here!!",
-          })
-        )
-        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
-        ;
-    }
     render() {
         console.log("rendering app with state " + JSON.stringify(this.state))
-        console.log("rendering app with urls " + JSON.stringify(this.state.craigslistUrlsResponse))
+        console.log("                   urls " + JSON.stringify(this.state.urls))
 
         return (
             <div>

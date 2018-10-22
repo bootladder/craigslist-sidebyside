@@ -20,11 +20,11 @@ class CraigslistQueryColumnUserInput extends React.Component {
     }
 
     componentDidMount(){
-        this.props.doRequest(this.input.controlEl.value)
+        this.props.doRequest(this.props.url)
         console.log("column doRequest with: "+this.props.url)
     }
     render() {
-        console.log("my url is: " + this.props.url)
+        console.log("render CraigslistQueryUserInput: " + JSON.stringify(this.props))
         return (
             <div>
                 <Container fluid={true}>
@@ -63,23 +63,67 @@ class CraigslistQueryColumn extends React.Component {
 
     constructor(props) {
         super(props);
+        this.doRequest = this.doRequest.bind(this);
+    }
+
+    state = {
+        columnState: "columnState",
+        queryResponseData: "queryResponseData"
     }
 
     componentDidMount() {
-//        this.props.doRequest("https://newyork.craigslist.org/d/architect-engineer-cad/search/egr")
+    }
+
+    validateCraigslistURL(url){
+        console.log(JSON.stringify(url))
+        if(url.length < 5){
+            console.log("length too short, defaulting URL length was "+url.length)
+            return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
+        }
+        else return url;
+    }
+    doRequest(craigslistSearchURL){
+        console.log("do request" + craigslistSearchURL + " state is " + JSON.stringify(this.state))
+        var validatedURL = this.validateCraigslistURL(craigslistSearchURL)
+        console.log("validatedURL: " + this.validatedURL)
+
+        var myJsonRequestObj = {
+            searchURL: encodeURIComponent(craigslistSearchURL),
+        };
+
+        fetch("http://localhost:8080/api/" , {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: JSON.stringify(myJsonRequestObj)
+        })
+        .then(response => response.json())
+        .then(data =>
+            this.setState({
+                users: data,
+                queryResponseData: data.response,
+                message: "ok!!",
+                dummystate: "ok finally changed state up here!!",
+          })
+        )
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
+        ;
     }
 
     render() {
+        console.log("render CraigslistQueryColumn: " + JSON.stringify(this.props))
         return (
             <div>
                 <div className="mui--text-left">
                     <CraigslistQueryColumnUserInput 
-                        doRequest={this.props.doRequest}
+                        doRequest={this.doRequest}
                         url={this.props.url}
                         />
                 </div>
                 <CraigslistQueryColumnResults 
-                    results={this.props.queryResponseData}
+                    results={this.state.queryResponseData}
                     hello="hello" 
                     myprop="<b>zwatef</b>"
                 />
