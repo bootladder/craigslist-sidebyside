@@ -72,7 +72,7 @@ class CraigslistQueryColumnResults extends React.Component {
 
         return (
             <div>
-                <div className="hello">{resultRows}</div>
+                <div className="hello x-scroll y-scroll">{resultRows}</div>
             </div>
         );
     }
