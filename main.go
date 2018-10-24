@@ -27,11 +27,6 @@ type getUrlsResponse struct {
 	Urls []string `json:"urls"`
 }
 
-type note struct {
-	SearchURL string `json:"searchURL"`
-	Response  string `json:"response"`
-}
-
 func main() {
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath",
@@ -59,24 +54,26 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var resp craigslistResponse
 	resp.ResponseHTML = makeRequest(req.SearchURL)
 
-	j, err := json.Marshal(resp)
+	jsonOut, err := json.Marshal(resp)
 	fatal(err)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write(j)
+	w.Write(jsonOut)
 }
 
 func createGetHandler(msg string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		getNoteHandler(w, r)
+		getHandler(w, r)
 	}
 }
 
-func getNoteHandler(w http.ResponseWriter, r *http.Request) {
+func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	var resp getUrlsResponse
 	var urls []string
+
+	//Get URLS from persistent storage
 	urls = append(urls, "https://baltimore.craigslist.org/search/jjj?query=firmware")
 	urls = append(urls, "https://seattle.craigslist.org/search/jjj?query=firmware")
 	urls = append(urls, "https://denver.craigslist.org/search/jjj?query=firmware")
@@ -85,17 +82,19 @@ func getNoteHandler(w http.ResponseWriter, r *http.Request) {
 	urls = append(urls, "https://portland.craigslist.org/search/jjj?query=firmware")
 	resp.Urls = urls
 
-	j, err := json.Marshal(resp)
+	jsonOut, err := json.Marshal(resp)
 	fatal(err)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write(j)
+	w.Write(jsonOut)
 }
 
 func makeRequest(url string) string {
 	log.Println("makeRequest: " + url)
 	resp, err := http.Get(url) //"https://httpbin.org/get"
+
+	//gracefully handle error with invalid craigslist URL
 	if err != nil {
 		log.Fatalln(err)
 	}
