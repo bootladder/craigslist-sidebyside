@@ -36,7 +36,6 @@ class CraigslistQueryColumnUserInput extends React.Component {
         <Input className="input-100percent" placeholder="Search Query" />
     </Row>
     <Row>
-        Category: 
         <select id="catAbb">
             <option value="ccc">community</option>
             <option value="eee">events</option>
