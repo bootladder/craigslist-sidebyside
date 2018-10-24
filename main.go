@@ -52,13 +52,14 @@ func createPostHandler(msg string) httprouter.Handle {
 
 func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 
-	var note note
-	err := json.NewDecoder(r.Body).Decode(&note)
-	note.SearchURL, _ = url.QueryUnescape(note.SearchURL)
+	var req craigslistRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	req.SearchURL, _ = url.QueryUnescape(req.SearchURL)
 
-	note.Response = makeRequest(note.SearchURL)
+	var resp craigslistResponse
+	resp.ResponseHTML = makeRequest(req.SearchURL)
 
-	j, err := json.Marshal(note)
+	j, err := json.Marshal(resp)
 	fatal(err)
 
 	w.Header().Set("Content-Type", "application/json")
