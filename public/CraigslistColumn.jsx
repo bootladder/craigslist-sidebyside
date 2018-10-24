@@ -27,13 +27,31 @@ class CraigslistQueryColumnUserInput extends React.Component {
     render() {
         console.log("render CraigslistQueryUserInput: " + JSON.stringify(this.props))
         return (
-            <div>
-                <Container fluid={true}>
-                    <Input ref={el => { this.input = el; }} placeholder="Craigslist Search URL" />
-                    <Button onClick={this.loadButtonClicked} size="small" color="primary">Load</Button>
-                    <Button onClick={this.saveButtonClicked} size="small" color="primary">Save</Button>
-                </Container>
-            </div>
+<div>
+    <Container>
+    <Row>
+        <Input className="mui--text-caption" ref={el => { this.input = el; }} placeholder="Craigslist Search URL" />
+    </Row>
+    <Row>
+        <Col md="8">
+            <Input placeholder="Search Query" />
+        </Col>
+        <Col md="2">
+            <Row>
+                <Button onClick={this.loadButtonClicked} size="small" color="primary">Load</Button>
+            </Row>
+            <Row>
+                <Button onClick={this.saveButtonClicked} size="small" color="primary">Save</Button>
+            </Row>
+        </Col>
+    </Row>
+    <Row>
+        <Col md="4">
+            <Input placeholder="City" />
+        </Col>
+    </Row>
+    </Container>
+</div>
         );
     }
 }
