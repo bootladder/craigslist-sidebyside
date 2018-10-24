@@ -30,25 +30,30 @@ class CraigslistQueryColumnUserInput extends React.Component {
 <div>
     <Container>
     <Row>
-        <Input className="mui--text-caption" ref={el => { this.input = el; }} placeholder="Craigslist Search URL" />
+        <Input className="mui--text-caption input-100percent" ref={el => { this.input = el; }} placeholder="Craigslist Search URL" />
     </Row>
     <Row>
-        <Col md="8">
-            <Input placeholder="Search Query" />
-        </Col>
-        <Col md="2">
-            <Row>
-                <Button onClick={this.loadButtonClicked} size="small" color="primary">Load</Button>
-            </Row>
-            <Row>
-                <Button onClick={this.saveButtonClicked} size="small" color="primary">Save</Button>
-            </Row>
-        </Col>
+        <Input className="input-100percent" placeholder="Search Query" />
     </Row>
     <Row>
-        <Col md="4">
-            <Input placeholder="City" />
-        </Col>
+        Category: 
+        <select id="catAbb">
+            <option value="ccc">community</option>
+            <option value="eee">events</option>
+            <option value="sss">for sale</option>
+            <option value="ggg">gigs</option>
+            <option value="hhh">housing</option>
+            <option value="jjj" selected="">jobs</option>
+            <option value="rrr">resumes</option>
+            <option value="bbb">services</option>
+        </select>
+    </Row>
+    <Row>
+        <Col><Input placeholder="City" /></Col>
+    </Row>
+    <Row>
+        <Button onClick={this.loadButtonClicked} size="small" color="primary">Load</Button>
+        <Button onClick={this.saveButtonClicked} size="small" color="primary">Save</Button>
     </Row>
     </Container>
 </div>

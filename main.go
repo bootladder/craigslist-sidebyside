@@ -76,12 +76,12 @@ func getNoteHandler(w http.ResponseWriter, r *http.Request) {
 
 	var resp getUrlsResponse
 	var urls []string
-	urls = append(urls, "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr")
-	urls = append(urls, "https://seattle.craigslist.org/d/architect-engineer-cad/search/egr")
-	urls = append(urls, "https://denver.craigslist.org/d/architect-engineer-cad/search/egr")
-	urls = append(urls, "https://austin.craigslist.org/d/architect-engineer-cad/search/egr")
-	urls = append(urls, "https://boston.craigslist.org/d/architect-engineer-cad/search/egr")
-	urls = append(urls, "https://portland.craigslist.org/d/architect-engineer-cad/search/egr")
+	urls = append(urls, "https://baltimore.craigslist.org/search/jjj?query=firmware")
+	urls = append(urls, "https://seattle.craigslist.org/search/jjj?query=firmware")
+	urls = append(urls, "https://denver.craigslist.org/search/jjj?query=firmware")
+	urls = append(urls, "https://austin.craigslist.org/search/jjj?query=firmware")
+	urls = append(urls, "https://boston.craigslist.org/search/jjj?query=firmware")
+	urls = append(urls, "https://portland.craigslist.org/search/jjj?query=firmware")
 	resp.Urls = urls
 
 	j, err := json.Marshal(resp)
