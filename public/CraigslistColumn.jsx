@@ -46,6 +46,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
             <option value="rrr">resumes</option>
             <option value="bbb">services</option>
         </select>
+        <CitySelector />
     </Row>
     <Row>
         <Col><Input placeholder="City" /></Col>
