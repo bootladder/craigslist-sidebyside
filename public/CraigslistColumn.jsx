@@ -22,34 +22,32 @@ class CraigslistQueryColumnUserInput extends React.Component {
         }
     }
     loadButtonClicked(){
-        this.props.doRequest(this.input.controlEl.value)
+        this.props.doRequest(this.URLInput.controlEl.value)
     }
     saveButtonClicked(){
         console.log("savebuttonclicked userinput" + this.props.hello)
-        this.input.controlEl.value = "i clicked the button"
+        this.URLInput.controlEl.value = "i clicked the button"
     }
     categorySelectorSelected(e){
         console.log("categorySelector Selected" + JSON.stringify(e))
-        //this.input.controlEl.value = "i selected " + e
         this.setState({
             category: e
         })
-        this.input.controlEl.value = this.createCraigslistURL(this.state.city,e,this.state.query)
+        this.URLInput.controlEl.value = this.createCraigslistURL(this.state.city,e,this.state.query)
     }
     citySelectorSelected(e){
         console.log("citySelector Selected" + JSON.stringify(e))
         this.setState({
             city: e
         })
-        this.input.controlEl.value = this.createCraigslistURL(e,this.state.category,this.state.query)
+        this.URLInput.controlEl.value = this.createCraigslistURL(e,this.state.category,this.state.query)
     }
     queryInputEvent(e){
-        //console.log("queryInputEvent " + JSON.stringify(e))
         console.log("queryInputEvent " + e.target.value)
         this.setState({
             query: this.queryInput.controlEl.value
         })
-        this.input.controlEl.value = this.createCraigslistURL(this.state.city,this.state.category,this.queryInput.controlEl.value)
+        this.URLInput.controlEl.value = this.createCraigslistURL(this.state.city,this.state.category,this.queryInput.controlEl.value)
     }
 
     createCraigslistURL(city,category,query){
@@ -57,9 +55,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
     }
 
     componentDidMount(){
-        //this.input.controlEl.value = this.props.url
-        this.input.controlEl.value = this.createCraigslistURL()
-        this.input.controlEl.onchange=this.queryInputEvent
+        this.URLInput.controlEl.value = this.props.url
         this.props.doRequest(this.props.url)
         console.log("column doRequest with: "+this.props.url)
     }
@@ -70,7 +66,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
     <Container>
     <Row>
         <Input className="mui--text-caption input-100percent" 
-                ref={el => { this.input = el; }} 
+                ref={el => { this.URLInput = el; }} 
                 placeholder="Craigslist Search URL" />
     </Row>
     <Row>
