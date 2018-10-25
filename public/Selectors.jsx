@@ -29,11 +29,20 @@ class CategorySelector extends React.Component {
 }
 
 class CitySelector extends React.Component {
+    constructor(props) {
+        super(props);
+        this.change = this.change.bind(this);
+        this.state = { categoryValue: "hello" };
+    }
+    change(e){
+        console.log("selected!!! " + JSON.stringify(e.target.value))
+        this.props.citySelectorSelected(e.target.value);
+    }
     render() {
-        console.log("render CraigslistQueryColumn: " + JSON.stringify(this.props))
+        console.log("render CitySelector: " + JSON.stringify(this.props))
         return (
             <div>
-                <select id="areaAbb" className="js-only">
+                <select id="areaAbb" className="js-only" onChange={this.change}>
                     <option value="bham">birmingham, AL</option>
                         <option value="albanyga">albany, GA</option>
                         <option value="athensga">athens, GA</option>
