@@ -10,17 +10,37 @@ class CraigslistQueryColumnUserInput extends React.Component {
         super(props);
         this.loadButtonClicked = this.loadButtonClicked.bind(this);
         this.saveButtonClicked = this.saveButtonClicked.bind(this);
+        this.categorySelectorSelected = this.categorySelectorSelected.bind(this);
+        this.state = {
+            category: "category1",
+            city: "city1",
+            query: "query1"
+        }
     }
     loadButtonClicked(){
         this.props.doRequest(this.input.controlEl.value)
     }
     saveButtonClicked(){
         console.log("savebuttonclicked userinput" + this.props.hello)
-        alert("1" + this.input.controlEl.value);
+        this.input.controlEl.value = "i clicked the button"
+    }
+    categorySelectorSelected(e){
+
+        console.log("categorySelector Selected" + JSON.stringify(e))
+        //this.input.controlEl.value = "i selected " + e
+        this.setState({
+            category: e
+        })
+        this.input.controlEl.value = this.createCraigslistURL(this.state.city,e,this.state.query)
+    }
+
+    createCraigslistURL(city,category,query){
+        return "http://"+city+".craigslist.org/search/"+category+"?query="+query
     }
 
     componentDidMount(){
-        this.input.controlEl.value = this.props.url
+        //this.input.controlEl.value = this.props.url
+        this.input.controlEl.value = this.createCraigslistURL()
         this.props.doRequest(this.props.url)
         console.log("column doRequest with: "+this.props.url)
     }
@@ -36,16 +56,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
         <Input className="input-100percent" placeholder="Search Query" />
     </Row>
     <Row>
-        <select id="catAbb">
-            <option value="ccc">community</option>
-            <option value="eee">events</option>
-            <option value="sss">for sale</option>
-            <option value="ggg">gigs</option>
-            <option value="hhh">housing</option>
-            <option value="jjj" selected="">jobs</option>
-            <option value="rrr">resumes</option>
-            <option value="bbb">services</option>
-        </select>
+        <CategorySelector categorySelectorSelected={this.categorySelectorSelected} myprop="myprop"/>
         <CitySelector />
     </Row>
     <Row>

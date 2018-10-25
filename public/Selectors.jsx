@@ -1,9 +1,39 @@
+class CategorySelector extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.change = this.change.bind(this);
+        this.state = { categoryValue: "hello" };
+    }
+    change(e){
+        console.log("selected!!! " + JSON.stringify(e.target.value))
+        this.props.categorySelectorSelected(e.target.value);
+    }
+    render() {
+        console.log("render CategorySelector: " + JSON.stringify(this.props))
+        return (
+            <div>
+                <select id="catAbb" onChange={this.change}>
+                    <option value="ccc">community</option>
+                    <option value="eee">events</option>
+                    <option value="sss">for sale</option>
+                    <option value="ggg">gigs</option>
+                    <option value="hhh">housing</option>
+                    <option value="jjj" selected="">jobs</option>
+                    <option value="rrr">resumes</option>
+                    <option value="bbb">services</option>
+                </select>
+            </div>
+        )
+    }
+}
+
 class CitySelector extends React.Component {
     render() {
         console.log("render CraigslistQueryColumn: " + JSON.stringify(this.props))
         return (
             <div>
-                <select id="areaAbb" class="js-only">
+                <select id="areaAbb" className="js-only">
                     <option value="bham">birmingham, AL</option>
                         <option value="albanyga">albany, GA</option>
                         <option value="athensga">athens, GA</option>

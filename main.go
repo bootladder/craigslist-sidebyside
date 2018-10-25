@@ -75,11 +75,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	//Get URLS from persistent storage
 	urls = append(urls, "https://baltimore.craigslist.org/search/jjj?query=firmware")
-	urls = append(urls, "https://seattle.craigslist.org/search/jjj?query=firmware")
-	urls = append(urls, "https://denver.craigslist.org/search/jjj?query=firmware")
-	urls = append(urls, "https://austin.craigslist.org/search/jjj?query=firmware")
-	urls = append(urls, "https://boston.craigslist.org/search/jjj?query=firmware")
-	urls = append(urls, "https://portland.craigslist.org/search/jjj?query=firmware")
+	//urls = append(urls, "https://seattle.craigslist.org/search/jjj?query=firmware")
+	//urls = append(urls, "https://denver.craigslist.org/search/jjj?query=firmware")
+	//urls = append(urls, "https://austin.craigslist.org/search/jjj?query=firmware")
+	//urls = append(urls, "https://boston.craigslist.org/search/jjj?query=firmware")
+	//urls = append(urls, "https://portland.craigslist.org/search/jjj?query=firmware")
 	resp.Urls = urls
 
 	jsonOut, err := json.Marshal(resp)
