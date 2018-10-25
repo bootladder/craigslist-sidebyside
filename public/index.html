@@ -11,7 +11,7 @@
   .search-table-outter { overflow-x: scroll; }
   .x-scroll { overflow-x: scroll; }
   th, td { min-width: 350px; max-width: 350px; overflow-x: scroll; zhite-space: nowrap}
-  .y-scroll {max-height: 600; overflow-y: scroll; display: block;  }
+  .y-scroll {max-height: 600px; overflow-y: scroll; display: block;  }
 </style>
 <style>
   .small-text{font-size: 8px;}
@@ -25,21 +25,16 @@
   }
 </style>
 <script src="mui-react.js"></script>
-<zlink  href="mui.css" rel="stylesheet" type="text/css" />
+<!-- <link  href="mui.css" rel="stylesheet" type="text/css" /> -->
 
 <script type="text/babel" src="CraigslistColumn.jsx"></script>
 <script type="text/babel" src="Selectors.jsx"></script>
 <script type="text/babel" src="app.jsx">make sure app is defined last</script>
 
 <div id="app"></div>
-<div id="root"></div>
 
 <script type="text/babel">
-
-  ReactDOM.render(
-    <h1>Hello, world!</h1>,
-    document.getElementById('root')
-  );
-
+  ReactDOM.render(<App />, document.getElementById('app'));
 </script>
+
 </html>
