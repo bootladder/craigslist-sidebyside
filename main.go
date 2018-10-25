@@ -39,12 +39,6 @@ func main() {
 	http.ListenAndServe(":8080", router)
 }
 
-func createPostHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		postNoteHandler(w, r)
-	}
-}
-
 func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 
 	var req craigslistRequest
@@ -54,6 +48,9 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var resp craigslistResponse
 	resp.ResponseHTML = makeRequest(req.SearchURL)
 
+	//Save the URL
+	saveURL(req.SearchURL)
+
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
 
@@ -62,25 +59,29 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonOut)
 }
 
-func createGetHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		getHandler(w, r)
-	}
+func saveURL(url string) {
+
+	printf("I'm saving the url " + url)
 }
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
+func loadURLs() (urls []string) {
+	printf("I'm loading the URLs")
 
-	var resp getUrlsResponse
-	var urls []string
-
-	//Get URLS from persistent storage
 	urls = append(urls, "https://baltimore.craigslist.org/search/jjj?query=software")
 	//urls = append(urls, "https://seattle.craigslist.org/search/jjj?query=firmware")
 	//urls = append(urls, "https://denver.craigslist.org/search/jjj?query=firmware")
 	//urls = append(urls, "https://austin.craigslist.org/search/jjj?query=firmware")
 	//urls = append(urls, "https://boston.craigslist.org/search/jjj?query=firmware")
 	//urls = append(urls, "https://portland.craigslist.org/search/jjj?query=firmware")
-	resp.Urls = urls
+	return
+}
+
+func getHandler(w http.ResponseWriter, r *http.Request) {
+
+	var resp getUrlsResponse
+
+	//Get URLS from persistent storage
+	resp.Urls = loadURLs()
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
@@ -121,4 +122,16 @@ func fatal(err error, msgs ...string) {
 
 func printf(s string, a ...interface{}) {
 	fmt.Printf(s, a)
+}
+
+func createPostHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		postNoteHandler(w, r)
+	}
+}
+
+func createGetHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		getHandler(w, r)
+	}
 }
