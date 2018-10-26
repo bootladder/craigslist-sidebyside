@@ -16,7 +16,8 @@ import (
 var err error
 
 type craigslistRequest struct {
-	SearchURL string `json:"searchURL"`
+	SearchURL   string `json:"searchURL"`
+	ColumnIndex int    `json:"columnIndex"`
 }
 
 type craigslistResponse struct {
@@ -28,6 +29,9 @@ type getUrlsResponse struct {
 }
 
 func main() {
+
+	loadURLs()
+
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath",
 		http.Dir("public"))
@@ -44,12 +48,13 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var req craigslistRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	req.SearchURL, _ = url.QueryUnescape(req.SearchURL)
+	fmt.Printf("the index is %d\n", req.ColumnIndex)
 
 	var resp craigslistResponse
 	resp.ResponseHTML = makeRequest(req.SearchURL)
 
 	//Save the URL
-	saveURL(req.SearchURL)
+	setURLAt(req.ColumnIndex, req.SearchURL)
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
@@ -64,7 +69,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	var resp getUrlsResponse
 
 	//Get URLS from persistent storage
-	resp.Urls = loadURLs()
+	resp.Urls = getUrls()
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)

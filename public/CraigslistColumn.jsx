@@ -22,7 +22,8 @@ class CraigslistQueryColumnUserInput extends React.Component {
         }
     }
     loadButtonClicked(){
-        this.props.doRequest(this.URLInput.controlEl.value)
+        console.log("the columnIndex is "+this.props.columnIndex)
+        this.props.doRequest(this.props.columnIndex,this.URLInput.controlEl.value)
     }
     saveButtonClicked(){
         console.log("savebuttonclicked userinput" + this.props.hello)
@@ -56,7 +57,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
 
     componentDidMount(){
         this.URLInput.controlEl.value = this.props.url
-        this.props.doRequest(this.props.url)
+        this.props.doRequest(this.props.columnIndex,this.props.url)
         console.log("column doRequest with: "+this.props.url)
     }
     render() {
@@ -136,13 +137,14 @@ class CraigslistQueryColumn extends React.Component {
         }
         else return url;
     }
-    doRequest(craigslistSearchURL){
+    doRequest(index, craigslistSearchURL){
         console.log("do request" + craigslistSearchURL + " state is " + JSON.stringify(this.state))
         var validatedURL = this.validateCraigslistURL(craigslistSearchURL)
         console.log("validatedURL: " + this.validatedURL)
 
         var myJsonRequestObj = {
             searchURL: encodeURIComponent(craigslistSearchURL),
+            columnIndex: index
         };
 
         fetch("http://localhost:8080/api/" , {
@@ -174,6 +176,7 @@ class CraigslistQueryColumn extends React.Component {
                     <CraigslistQueryColumnUserInput 
                         doRequest={this.doRequest}
                         url={this.props.url}
+                        columnIndex={this.props.columnIndex}
                         />
                 </div>
                 <CraigslistQueryColumnResults 

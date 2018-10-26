@@ -45,6 +45,7 @@ class App extends React.Component {
             saveColumnInfo={this.saveColumnInfo} 
             queryResponseData={this.state.craigslistQueryResponse} 
             url={urls[j]}
+            columnIndex={j}
             />
     </div>
 </td> 
