@@ -59,23 +59,6 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonOut)
 }
 
-func saveURL(url string) {
-
-	printf("I'm saving the url " + url)
-}
-
-func loadURLs() (urls []string) {
-	printf("I'm loading the URLs")
-
-	urls = append(urls, "https://baltimore.craigslist.org/search/jjj?query=software")
-	//urls = append(urls, "https://seattle.craigslist.org/search/jjj?query=firmware")
-	//urls = append(urls, "https://denver.craigslist.org/search/jjj?query=firmware")
-	//urls = append(urls, "https://austin.craigslist.org/search/jjj?query=firmware")
-	//urls = append(urls, "https://boston.craigslist.org/search/jjj?query=firmware")
-	//urls = append(urls, "https://portland.craigslist.org/search/jjj?query=firmware")
-	return
-}
-
 func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	var resp getUrlsResponse

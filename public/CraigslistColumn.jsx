@@ -82,8 +82,8 @@ class CraigslistQueryColumnUserInput extends React.Component {
         <Col><Input placeholder="City" /></Col>
     </Row>
     <Row>
-        <Button onClick={this.loadButtonClicked} size="small" color="primary">Load</Button>
-        <Button onClick={this.saveButtonClicked} size="small" color="primary">Save</Button>
+        <Button onClick={this.loadButtonClicked} size="small" color="primary">Load Results and Save URL</Button>
+        <Button onClick={this.saveButtonClicked} size="small" color="primary">Delete this Column</Button>
     </Row>
     </Container>
 </div>
