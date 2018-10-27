@@ -53,9 +53,22 @@ class App extends React.Component {
         }
         return children
     }
-    saveColumnInfo(e) {
-        console.log("App saveColumnInfo")
+
+    addButtonClicked(e) {
+        console.log("Add Button Clicked")
+
+        fetch("http://localhost:8080/api/" , {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "PUT",
+        })
+        .then(function(){console.log("HELLO!!!\n\n\n"); this.render()})
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
+        ;
     }
+
     render() {
         console.log("rendering app with state " + JSON.stringify(this.state))
         console.log("                   urls " + JSON.stringify(this.state.urls))
@@ -63,6 +76,7 @@ class App extends React.Component {
         return (
             <div>
                 <h1>This is the App</h1>
+                <Button onClick={this.addButtonClicked} size="small" color="primary">Add New Column</Button>
                 <hr/>
                 <div className="search-table-outter wrapper">
                 <table className="search-table inner">

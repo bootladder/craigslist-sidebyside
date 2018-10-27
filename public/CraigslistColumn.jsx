@@ -9,7 +9,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
     constructor(props) {
         super(props);
         this.loadButtonClicked = this.loadButtonClicked.bind(this);
-        this.saveButtonClicked = this.saveButtonClicked.bind(this);
+        this.deleteButtonClicked = this.deleteButtonClicked.bind(this);
 
         this.categorySelectorSelected = this.categorySelectorSelected.bind(this);
         this.citySelectorSelected = this.citySelectorSelected.bind(this);
@@ -25,9 +25,9 @@ class CraigslistQueryColumnUserInput extends React.Component {
         console.log("the columnIndex is "+this.props.columnIndex)
         this.props.doRequest(this.props.columnIndex,this.URLInput.controlEl.value)
     }
-    saveButtonClicked(){
-        console.log("savebuttonclicked userinput" + this.props.hello)
-        this.URLInput.controlEl.value = "i clicked the button"
+    deleteButtonClicked(){
+        console.log("deletebuttonclicked: columnIndex:  " + this.props.columnIndex)
+        this.props.doDeleteRequest(this.props.columnIndex)
     }
     categorySelectorSelected(e){
         console.log("categorySelector Selected" + JSON.stringify(e))
@@ -84,7 +84,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
     </Row>
     <Row>
         <Button onClick={this.loadButtonClicked} size="small" color="primary">Load Results and Save URL</Button>
-        <Button onClick={this.saveButtonClicked} size="small" color="primary">Delete this Column</Button>
+        <Button onClick={this.deleteButtonClicked} size="small" color="primary">Delete this Column</Button>
     </Row>
     </Container>
 </div>
@@ -168,6 +168,26 @@ class CraigslistQueryColumn extends React.Component {
         ;
     }
 
+    doDeleteRequest(index) {
+        console.log("CraigslistQueryColumn doDeleteRequest() : "+index)
+
+        var myJsonRequestObj = {
+            columnIndex: index
+        };
+
+        fetch("http://localhost:8080/api/" , {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "DELETE",
+            body: JSON.stringify(myJsonRequestObj)
+        })
+        .then(function(){console.log("HELLO!!!\n\n\n"); this.render()})
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
+        ;
+    }
+
     render() {
         console.log("render CraigslistQueryColumn: " + JSON.stringify(this.props))
         return (
@@ -175,6 +195,7 @@ class CraigslistQueryColumn extends React.Component {
                 <div className="mui--text-left">
                     <CraigslistQueryColumnUserInput 
                         doRequest={this.doRequest}
+                        doDeleteRequest={this.doDeleteRequest}
                         url={this.props.url}
                         columnIndex={this.props.columnIndex}
                         />

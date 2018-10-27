@@ -34,6 +34,14 @@ func setURLAt(index int, url string) {
 	urls[index] = url
 	save()
 }
+func deleteURLAt(index int) {
+	urls = append(urls[:index], urls[(index+1):]...)
+	save()
+}
+func addURL() {
+	urls = append(urls, "http://portland.craigslist.org/search/sss?query=bike")
+	save()
+}
 
 func getUrls() []string {
 	return urls

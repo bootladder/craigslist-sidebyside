@@ -20,6 +20,10 @@ type craigslistRequest struct {
 	ColumnIndex int    `json:"columnIndex"`
 }
 
+type craigslistDeleteRequest struct {
+	ColumnIndex int `json:"columnIndex"`
+}
+
 type craigslistResponse struct {
 	ResponseHTML string `json:"response"`
 }
@@ -38,6 +42,8 @@ func main() {
 
 	router.POST("/api/", createPostHandler(""))
 	router.GET("/api/", createGetHandler(""))
+	router.DELETE("/api/", createDeleteHandler(""))
+	router.PUT("/api/", createPutHandler(""))
 
 	browser.OpenURL("http://localhost:8080/static/index.html")
 	http.ListenAndServe(":8080", router)
@@ -62,6 +68,21 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(jsonOut)
+}
+
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+
+	var req craigslistDeleteRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	fatal(err)
+	fmt.Printf("Delete: the index is %d\n", req.ColumnIndex)
+
+	deleteURLAt(req.ColumnIndex)
+}
+
+func putHandler(w http.ResponseWriter, r *http.Request) {
+
+	addURL()
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
@@ -121,5 +142,17 @@ func createPostHandler(msg string) httprouter.Handle {
 func createGetHandler(msg string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		getHandler(w, r)
+	}
+}
+
+func createDeleteHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		deleteHandler(w, r)
+	}
+}
+
+func createPutHandler(msg string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		putHandler(w, r)
 	}
 }
