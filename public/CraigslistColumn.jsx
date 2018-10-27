@@ -13,6 +13,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
 
         this.categorySelectorSelected = this.categorySelectorSelected.bind(this);
         this.citySelectorSelected = this.citySelectorSelected.bind(this);
+        this.cityInputEvent = this.cityInputEvent.bind(this);
         this.queryInputEvent = this.queryInputEvent.bind(this);
 
         this.state = {
@@ -42,6 +43,13 @@ class CraigslistQueryColumnUserInput extends React.Component {
             city: e
         })
         this.URLInput.controlEl.value = this.createCraigslistURL(e,this.state.category,this.state.query)
+    }
+    cityInputEvent(value){
+        console.log("cityInputEvent " + value)
+        this.setState({
+            city: value
+        })
+        this.URLInput.controlEl.value = this.createCraigslistURL(value,this.state.category,this.queryInput.controlEl.value)
     }
     queryInputEvent(e){
         console.log("queryInputEvent " + e.target.value)
@@ -77,10 +85,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
     </Row>
     <Row>
         <CategorySelector categorySelectorSelected={this.categorySelectorSelected} myprop="myprop"/>
-        <CitySelector citySelectorSelected={this.citySelectorSelected}/>
-    </Row>
-    <Row>
-        <Col><Input placeholder="City" /></Col>
+        <CitySelector citySelectorSelected={this.citySelectorSelected} cityInputEvent={this.cityInputEvent}/>
     </Row>
     <Row>
         <Button onClick={this.loadButtonClicked} size="small" color="primary">Load Results and Save URL</Button>

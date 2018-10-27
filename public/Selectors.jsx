@@ -13,7 +13,8 @@ class CategorySelector extends React.Component {
         console.log("render CategorySelector: " + JSON.stringify(this.props))
         return (
             <div>
-                <select id="catAbb" onChange={this.change} defaultValue="jjj">
+                <select id="catAbb" onChange={this.change} defaultValue="1">
+                    <option value="1">Select Category</option>
                     <option value="ccc">community</option>
                     <option value="eee">events</option>
                     <option value="sss">for sale</option>
@@ -32,17 +33,23 @@ class CitySelector extends React.Component {
     constructor(props) {
         super(props);
         this.change = this.change.bind(this);
+        this.cityInputEvent = this.cityInputEvent.bind(this);
         this.state = { categoryValue: "hello" };
     }
     change(e){
         console.log("selected!!! " + JSON.stringify(e.target.value))
         this.props.citySelectorSelected(e.target.value);
     }
+    cityInputEvent(e){
+        console.log("CitySelector cityInputEvent " + e.target.value)
+        this.props.cityInputEvent(this.cityInput.controlEl.value)
+    }
     render() {
         console.log("render CitySelector: " + JSON.stringify(this.props))
         return (
             <div>
-                <select id="areaAbb" className="js-only" onChange={this.change} defaultValue="auburn">
+                <select id="areaAbb" className="js-only" onChange={this.change} defaultValue="1">
+                    <option value="1">Select City</option>
                     <option value="bham">birmingham, AL</option>
                     <option value="albanyga">albany, GA</option>
                     <option value="athensga">athens, GA</option>
@@ -71,6 +78,11 @@ class CitySelector extends React.Component {
                     <option value="shoals">the shoals</option>
                     <option value="tuscaloosa">tuscaloosa</option>
                 </select>
+                <Row>
+                    <Col><Input placeholder="City" onChange={this.cityInputEvent} ref={el => { this.cityInput = el; }} /></Col>
+                
+                
+                </Row>
             </div>
         );
     }
