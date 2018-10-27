@@ -6,7 +6,6 @@ class App extends React.Component {
       this.doDeleteRequest = this.doDeleteRequest.bind(this);
     }
     state = {
-        dummystate: "initial dummy state",
         urls: [],
         children: <td>hello</td>
     }

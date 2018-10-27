@@ -32,30 +32,22 @@ class CraigslistQueryColumnUserInput extends React.Component {
     }
     categorySelectorSelected(e){
         console.log("categorySelector Selected" + JSON.stringify(e))
-        this.setState({
-            category: e
-        })
+        this.setState({ category: e })
         this.URLInput.controlEl.value = this.createCraigslistURL(this.state.city,e,this.state.query)
     }
     citySelectorSelected(e){
         console.log("citySelector Selected" + JSON.stringify(e))
-        this.setState({
-            city: e
-        })
+        this.setState({ city: e })
         this.URLInput.controlEl.value = this.createCraigslistURL(e,this.state.category,this.state.query)
     }
     cityInputEvent(value){
         console.log("cityInputEvent " + value)
-        this.setState({
-            city: value
-        })
+        this.setState({ city: value  })
         this.URLInput.controlEl.value = this.createCraigslistURL(value,this.state.category,this.queryInput.controlEl.value)
     }
     queryInputEvent(e){
         console.log("queryInputEvent " + e.target.value)
-        this.setState({
-            query: this.queryInput.controlEl.value
-        })
+        this.setState({ query: this.queryInput.controlEl.value })
         this.URLInput.controlEl.value = this.createCraigslistURL(this.state.city,this.state.category,this.queryInput.controlEl.value)
     }
 
@@ -127,11 +119,7 @@ class CraigslistQueryColumn extends React.Component {
     }
 
     state = {
-        columnState: "columnState",
         queryResponseData: "queryResponseData"
-    }
-
-    componentDidMount() {
     }
 
     validateCraigslistURL(url){
