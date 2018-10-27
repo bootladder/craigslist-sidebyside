@@ -168,26 +168,6 @@ class CraigslistQueryColumn extends React.Component {
         ;
     }
 
-    doDeleteRequest(index) {
-        console.log("CraigslistQueryColumn doDeleteRequest() : "+index)
-
-        var myJsonRequestObj = {
-            columnIndex: index
-        };
-
-        fetch("http://localhost:8080/api/" , {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method: "DELETE",
-            body: JSON.stringify(myJsonRequestObj)
-        })
-        .then(function(){console.log("HELLO!!!\n\n\n"); this.render()})
-        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
-        ;
-    }
-
     render() {
         console.log("render CraigslistQueryColumn: " + JSON.stringify(this.props))
         return (
@@ -195,7 +175,7 @@ class CraigslistQueryColumn extends React.Component {
                 <div className="mui--text-left">
                     <CraigslistQueryColumnUserInput 
                         doRequest={this.doRequest}
-                        doDeleteRequest={this.doDeleteRequest}
+                        doDeleteRequest={this.props.doDeleteRequest}
                         url={this.props.url}
                         columnIndex={this.props.columnIndex}
                         />

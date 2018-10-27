@@ -3,6 +3,7 @@ class App extends React.Component {
       super(props);
       this.getCraigslistUrls = this.getCraigslistUrls.bind(this);
       this.addButtonClicked = this.addButtonClicked.bind(this);
+      this.doDeleteRequest = this.doDeleteRequest.bind(this);
     }
     state = {
         dummystate: "initial dummy state",
@@ -45,6 +46,7 @@ class App extends React.Component {
         <CraigslistQueryColumn 
             url={urls[j]}
             columnIndex={j}
+            doDeleteRequest={this.doDeleteRequest}
             />
     </div>
 </td> 
@@ -58,6 +60,27 @@ class App extends React.Component {
 
         fetch("http://localhost:8080/api/" , {
             method: "PUT"
+        })
+        .then(response => response.json())
+        .then(data =>
+            this.updateUrls(data.urls)
+        )
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
+    }
+
+    doDeleteRequest(index) {
+        console.log("Delete Button Clicked")
+
+        var myJsonRequestObj = {
+            columnIndex: index
+        };
+        fetch("http://localhost:8080/api/" , {
+            method: "DELETE",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(myJsonRequestObj)
         })
         .then(response => response.json())
         .then(data =>

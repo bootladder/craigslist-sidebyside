@@ -34,6 +34,9 @@ type getUrlsResponse struct {
 type addUrlsResponse struct {
 	Urls []string `json:"urls"`
 }
+type deleteUrlsResponse struct {
+	Urls []string `json:"urls"`
+}
 
 func main() {
 
@@ -81,6 +84,16 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Delete: the index is %d\n", req.ColumnIndex)
 
 	deleteURLAt(req.ColumnIndex)
+
+	var resp deleteUrlsResponse
+	resp.Urls = getUrls()
+
+	jsonOut, err := json.Marshal(resp)
+	fatal(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonOut)
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request) {
