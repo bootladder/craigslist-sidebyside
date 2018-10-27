@@ -42,8 +42,6 @@ class App extends React.Component {
 <td key={j}>
     <div>
         <CraigslistQueryColumn 
-            saveColumnInfo={this.saveColumnInfo} 
-            queryResponseData={this.state.craigslistQueryResponse} 
             url={urls[j]}
             columnIndex={j}
             />
@@ -58,15 +56,16 @@ class App extends React.Component {
         console.log("Add Button Clicked")
 
         fetch("http://localhost:8080/api/" , {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
             method: "PUT",
         })
-        .then(function(){console.log("HELLO!!!\n\n\n"); this.render()})
-        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
+        //.then(response => response.json())
+        .then(function(){console.log("HELLO!!! \n\n\n"); })
+        //.then(data =>
+        //    this.updateUrls(data.urls)
+        //)
+        .catch(function(){console.log("wat error" + JSON.stringify(error.message) + JSON.stringify(error))})
         ;
+        console.log("wat")
     }
 
     render() {

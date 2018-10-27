@@ -39,7 +39,7 @@ func deleteURLAt(index int) {
 	save()
 }
 func addURL() {
-	urls = append(urls, "http://portland.craigslist.org/search/sss?query=bike")
+	urls = append(urls, "http://denver.craigslist.org/search/sss?query=bike")
 	save()
 }
 

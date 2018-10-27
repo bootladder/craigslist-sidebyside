@@ -31,6 +31,9 @@ type craigslistResponse struct {
 type getUrlsResponse struct {
 	Urls []string `json:"urls"`
 }
+type addUrlsResponse struct {
+	Urls []string `json:"urls"`
+}
 
 func main() {
 
@@ -82,7 +85,17 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 func putHandler(w http.ResponseWriter, r *http.Request) {
 
+	var resp addUrlsResponse
 	addURL()
+	//Get URLS from persistent storage
+	resp.Urls = getUrls()
+
+	jsonOut, err := json.Marshal(resp)
+	fatal(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonOut)
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
