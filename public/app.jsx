@@ -2,6 +2,7 @@ class App extends React.Component {
     constructor(props) {
       super(props);
       this.getCraigslistUrls = this.getCraigslistUrls.bind(this);
+      this.addButtonClicked = this.addButtonClicked.bind(this);
     }
     state = {
         dummystate: "initial dummy state",
@@ -56,16 +57,13 @@ class App extends React.Component {
         console.log("Add Button Clicked")
 
         fetch("http://localhost:8080/api/" , {
-            method: "PUT",
+            method: "PUT"
         })
-        //.then(response => response.json())
-        .then(function(){console.log("HELLO!!! \n\n\n"); })
-        //.then(data =>
-        //    this.updateUrls(data.urls)
-        //)
-        .catch(function(){console.log("wat error" + JSON.stringify(error.message) + JSON.stringify(error))})
-        ;
-        console.log("wat")
+        .then(response => response.json())
+        .then(data =>
+            this.updateUrls(data.urls)
+        )
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
     }
 
     render() {
