@@ -4,6 +4,7 @@ class App extends React.Component {
       this.getCraigslistUrls = this.getCraigslistUrls.bind(this);
       this.addButtonClicked = this.addButtonClicked.bind(this);
       this.doDeleteRequest = this.doDeleteRequest.bind(this);
+      this.getCraigslistUrlSet = this.getCraigslistUrlSet.bind(this);
     }
     state = {
         urls: [],
@@ -17,6 +18,17 @@ class App extends React.Component {
         console.log("     get craigslistURLS")
 
         fetch("http://localhost:8080/api/" , {
+            method: "GET"
+        })
+        .then(response => response.json())
+        .then(data =>
+            this.updateUrls(data.urls)
+        )
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
+    }
+    getCraigslistUrlSet(setIndex){
+        console.log("getCraigslistUrlSet: index " + setIndex)
+        fetch("http://localhost:8080/api/" + setIndex , {
             method: "GET"
         })
         .then(response => response.json())
@@ -96,6 +108,8 @@ class App extends React.Component {
             <div>
                 <h1>This is the App</h1>
                 <Button onClick={this.addButtonClicked} size="small" color="primary">Add New Column</Button>
+                <Button onClick={()=>this.getCraigslistUrlSet(1)} size="small" color="primary">Load URL Set #1</Button>
+                <Button onClick={()=>this.getCraigslistUrlSet(2)} size="small" color="primary">Load URL Set #2</Button>
                 <hr/>
                 <div className="search-table-outter wrapper">
                 <table className="search-table inner">

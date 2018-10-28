@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/browser"
@@ -42,6 +43,7 @@ func main() {
 
 	router.POST("/api/", createPostHandler(""))
 	router.GET("/api/", createGetHandler(""))
+	router.GET("/api/:setIndex", getURLSet)
 	router.DELETE("/api/", createDeleteHandler(""))
 	router.PUT("/api/", createPutHandler(""))
 
@@ -91,6 +93,17 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	returnURLsJSONResponse(w)
+}
+
+func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	i1, err := strconv.Atoi(ps.ByName("setIndex"))
+	fatal(err)
+	writeResponseURLSet(w, i1)
+}
+
+func writeResponseURLSet(w http.ResponseWriter, setIndex int) {
+
+	fmt.Fprintf(w, "hello, %s!\n", setIndex)
 }
 
 func makeRequest(url string) string {
