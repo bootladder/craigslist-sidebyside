@@ -28,13 +28,7 @@ type craigslistResponse struct {
 	ResponseHTML string `json:"response"`
 }
 
-type getUrlsResponse struct {
-	Urls []string `json:"urls"`
-}
 type addUrlsResponse struct {
-	Urls []string `json:"urls"`
-}
-type deleteUrlsResponse struct {
 	Urls []string `json:"urls"`
 }
 
@@ -85,45 +79,18 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	deleteURLAt(req.ColumnIndex)
 
-	var resp deleteUrlsResponse
-	resp.Urls = getUrls()
-
-	jsonOut, err := json.Marshal(resp)
-	fatal(err)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonOut)
+	returnURLsJSONResponse(w)
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request) {
 
-	var resp addUrlsResponse
 	addURL()
-	//Get URLS from persistent storage
-	resp.Urls = getUrls()
-
-	jsonOut, err := json.Marshal(resp)
-	fatal(err)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonOut)
+	returnURLsJSONResponse(w)
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
 
-	var resp getUrlsResponse
-
-	//Get URLS from persistent storage
-	resp.Urls = getUrls()
-
-	jsonOut, err := json.Marshal(resp)
-	fatal(err)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonOut)
+	returnURLsJSONResponse(w)
 }
 
 func makeRequest(url string) string {
@@ -142,6 +109,18 @@ func makeRequest(url string) string {
 
 	//log.Println(string(body))
 	return string(body)
+}
+
+func returnURLsJSONResponse(w http.ResponseWriter) {
+	var resp addUrlsResponse
+	resp.Urls = getUrls()
+
+	jsonOut, err := json.Marshal(resp)
+	fatal(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonOut)
 }
 
 func fatal(err error, msgs ...string) {
