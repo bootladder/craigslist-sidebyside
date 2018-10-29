@@ -32,24 +32,24 @@ func save() {
 	ioutil.WriteFile(urlsFilename, []byte(newcontents), 755)
 }
 
-func setURLAt(index int, url string) {
+func uRLSsetURLAt(index int, url string) {
 	urls[index] = url
 	save()
 }
-func deleteURLAt(index int) {
+func uRLSdeleteURLAt(index int) {
 	urls = append(urls[:index], urls[(index+1):]...)
 	save()
 }
-func addURL() {
+func uRLSaddURL() {
 	urls = append(urls, "http://denver.craigslist.org/search/sss?query=bike")
 	save()
 }
 
-func getUrls() []string {
+func uRLSgetUrls() []string {
 	return urls
 }
 
-func loadURLs() {
+func uRLSloadURLs() {
 	log.Print("loadURLs() : ")
 
 	touch(urlsFilename)
@@ -65,7 +65,7 @@ func loadURLs() {
 	}
 }
 
-func loadURLSet2() {
+func uRLSloadURLSet2() {
 	log.Print("I'm loading the URLs Set 2")
 
 	touch(urlsFilenameSet2)

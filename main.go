@@ -16,6 +16,8 @@ import (
 
 var err error
 
+var urlstore urlStore
+
 type craigslistRequest struct {
 	SearchURL   string `json:"searchURL"`
 	ColumnIndex int    `json:"columnIndex"`
@@ -35,7 +37,7 @@ type addUrlsResponse struct {
 
 func main() {
 
-	loadURLs()
+	urlstore.loadURLs()
 
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath",
@@ -62,7 +64,7 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	resp.ResponseHTML = makeRequest(req.SearchURL)
 
 	//Save the URL
-	setURLAt(req.ColumnIndex, req.SearchURL)
+	urlstore.setURLAt(req.ColumnIndex, req.SearchURL)
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
@@ -79,14 +81,14 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	fatal(err)
 	fmt.Printf("Delete: the index is %d\n", req.ColumnIndex)
 
-	deleteURLAt(req.ColumnIndex)
+	urlstore.deleteURLAt(req.ColumnIndex)
 
 	returnURLsJSONResponse(w)
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request) {
 
-	addURL()
+	urlstore.addURL()
 	returnURLsJSONResponse(w)
 }
 
@@ -104,7 +106,7 @@ func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func writeResponseURLSet(w http.ResponseWriter, setIndex int) {
 
 	log.Printf("writeResponseURLSet(%d)\n", setIndex)
-	loadURLSet2()
+	urlstore.loadURLSet2()
 	returnURLsJSONResponse(w)
 }
 
@@ -128,7 +130,7 @@ func makeRequest(url string) string {
 
 func returnURLsJSONResponse(w http.ResponseWriter) {
 	var resp addUrlsResponse
-	resp.Urls = getUrls()
+	resp.Urls = urlstore.getUrls()
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
@@ -150,7 +152,7 @@ func fatal(err error, msgs ...string) {
 }
 
 func printf(s string, a ...interface{}) {
-	fmt.Printf(s, a)
+	fmt.Printf(s, a...)
 }
 
 func createPostHandler(msg string) httprouter.Handle {
