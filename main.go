@@ -56,7 +56,7 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var req craigslistRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	req.SearchURL, _ = url.QueryUnescape(req.SearchURL)
-	fmt.Printf("the index is %d\n", req.ColumnIndex)
+	fmt.Printf("POST URL: index is %d\n", req.ColumnIndex)
 
 	var resp craigslistResponse
 	resp.ResponseHTML = makeRequest(req.SearchURL)
@@ -103,7 +103,9 @@ func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 func writeResponseURLSet(w http.ResponseWriter, setIndex int) {
 
-	fmt.Fprintf(w, "hello, %s!\n", setIndex)
+	log.Printf("writeResponseURLSet(%d)\n", setIndex)
+	loadURLSet2()
+	returnURLsJSONResponse(w)
 }
 
 func makeRequest(url string) string {

@@ -51,6 +51,7 @@ class App extends React.Component {
 
         let children = []
         for (let j = 0; j < urls.length; j++) {
+            globals.key = globals.key + 1
             children.push(
 <td key={j}>
     <div>
@@ -58,6 +59,7 @@ class App extends React.Component {
             url={urls[j]}
             columnIndex={j}
             doDeleteRequest={this.doDeleteRequest}
+            globalKey={globals.key}
             />
     </div>
 </td> 

@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
 
 var urlsFilename = "/home/steve/craigslist-urls"
+var urlsFilenameSet2 = "/home/steve/housing.craigslisturls"
 var urls []string
 
 func saveURL(url string) {
@@ -21,7 +23,7 @@ func saveURL(url string) {
 }
 
 func save() {
-	printf("Saving URLs")
+	log.Print("Saving URLs")
 	touch(urlsFilename)
 	var newcontents string
 	for _, url := range urls {
@@ -48,11 +50,30 @@ func getUrls() []string {
 }
 
 func loadURLs() {
-	printf("I'm loading the URLs")
+	log.Print("loadURLs() : ")
 
 	touch(urlsFilename)
 	contents, err := ioutil.ReadFile(urlsFilename)
 	fatal(err)
+
+	urls = nil //clear the slice
+
+	scanner := bufio.NewScanner(strings.NewReader(string(contents)))
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+		urls = append(urls, scanner.Text())
+	}
+}
+
+func loadURLSet2() {
+	log.Print("I'm loading the URLs Set 2")
+
+	touch(urlsFilenameSet2)
+	contents, err := ioutil.ReadFile(urlsFilenameSet2)
+	fatal(err)
+
+	urls = nil //clear the slice
+
 	scanner := bufio.NewScanner(strings.NewReader(string(contents)))
 	for scanner.Scan() {
 		fmt.Println(scanner.Text())

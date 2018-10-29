@@ -58,7 +58,10 @@ class CraigslistQueryColumnUserInput extends React.Component {
     componentDidMount(){
         this.URLInput.controlEl.value = this.props.url
         this.props.doRequest(this.props.columnIndex,this.props.url)
-        console.log("column doRequest with: "+this.props.url)
+        console.log("UserInput componentDidMount() : column doRequest with: "+this.props.url)
+    }
+    componentDidUpdate(){
+        console.log("UserInput componentDidUpdate()" )
     }
     render() {
         console.log("render CraigslistQueryUserInput: " + JSON.stringify(this.props))
