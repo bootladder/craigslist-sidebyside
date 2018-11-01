@@ -7,28 +7,32 @@ import (
 
 type urlStore struct {
 	reader  io.Reader
-	urlsets []urlSet
+	urlsets urlSets
+}
+type urlSets struct {
+	sets []urlSet
 }
 type urlSet struct {
 	urls []string
 }
 
+var pathToUrls = "/home/steve/craigslisturls.json"
+
 func (s *urlStore) loadURLs() error {
-	var b []byte
-	n, err := s.reader.Read(b)
-	printf("the url string is : %v and number of bytes read is %v", b, n)
+	n, err := external.readfile(pathToUrls)
+	printf("the url string is : %v", string(n))
 	if err != nil {
 		return err
 	}
 
-	err = s.parseURLsFile(b)
+	err = s.parseURLsFile(n)
 	return err
 }
 
 func (s *urlStore) parseURLsFile(b []byte) error {
 
-	urlsets := make([]urlSet, 0)
-	err := json.Unmarshal(b, urlsets)
+	urlsets := urlSets{}
+	err := json.Unmarshal(b, &urlsets)
 	urlstore.urlsets = urlsets
 	return err
 	//return errors.New("hello")

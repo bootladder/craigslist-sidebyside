@@ -7,10 +7,8 @@ import (
 
 func Test_loadURLs_readFailed_returnsError(t *testing.T) {
 	var urlstore urlStore
-	mockreader := mockReader{}
-	mockreader.shouldError = true
-	urlstore.reader = mockreader
 
+	usingMockReadFileFail(errors.New("fail reading"))
 	err := urlstore.loadURLs()
 	if err == nil {
 		t.Errorf("expected file io error, got nil")
@@ -18,11 +16,11 @@ func Test_loadURLs_readFailed_returnsError(t *testing.T) {
 }
 func Test_loadURLs_badJSON_returnsError(t *testing.T) {
 	var urlstore urlStore
-	mockreader := mockReader{}
-	mockreader.shouldError = false
-	mockreader.returnedBytes = []byte("hello")
-	urlstore.reader = mockreader
 
+	jsonString := `
+	thisisnotjson
+		`
+	usingMockReadFileSuccess([]byte(jsonString))
 	err := urlstore.loadURLs()
 	if err == nil {
 		t.Errorf("expected file io error, got nil")
@@ -42,12 +40,10 @@ func Test_loadURLs_goodJSON_OK(t *testing.T) {
 			"http://houston.craigslist.org/jjj/?query=hello"
 		]
 	}
+	
 		`
+	usingMockReadFileSuccess([]byte(jsonString))
 	var urlstore urlStore
-	mockreader := mockReader{}
-	mockreader.shouldError = false
-	mockreader.returnedBytes = []byte(jsonString)
-	urlstore.reader = mockreader
 
 	err := urlstore.loadURLs()
 	if err != nil {
@@ -68,27 +64,32 @@ func Test_loadURLs_topJSONIsNotArray_Fails(t *testing.T) {
 	
 	`
 	var urlstore urlStore
-	mockreader := mockReader{}
-	mockreader.shouldError = false
-	mockreader.returnedBytes = []byte(jsonString)
-	urlstore.reader = mockreader
+
+	usingMockReadFileSuccess([]byte(jsonString))
 
 	err := urlstore.loadURLs()
 	if err != nil {
 		t.Errorf("expected no error, got error")
 	}
-
 }
 
-type mockReader struct {
-	shouldError   bool
-	returnedBytes []byte
+var mockreadfileBytes []byte
+var mockreadfileError error
+
+func mockReadFile(filename string) ([]byte, error) {
+	return mockreadfileBytes, mockreadfileError
 }
 
-func (m mockReader) Read(p []byte) (n int, err error) {
-	if m.shouldError == true {
-		return 0, errors.New("hello")
-	}
-	copy(p, m.returnedBytes)
-	return len(p), nil
+func usingMockReadFileSuccess(myBytes []byte) {
+
+	external.readfile = mockReadFile
+	mockreadfileError = nil
+	mockreadfileBytes = myBytes
+}
+
+func usingMockReadFileFail(err error) {
+
+	external.readfile = mockReadFile
+	mockreadfileError = err
+	mockreadfileBytes = []byte("doesn't matter")
 }
