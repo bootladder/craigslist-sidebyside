@@ -7,13 +7,7 @@ import (
 
 type urlStore struct {
 	reader  io.Reader
-	urlsets urlSets
-}
-type urlSets struct {
-	sets []urlSet
-}
-type urlSet struct {
-	urls []string
+	urlsets [][]string
 }
 
 var pathToUrls = "/home/steve/craigslisturls.json"
@@ -31,31 +25,29 @@ func (s *urlStore) loadURLs() error {
 
 func (s *urlStore) parseURLsFile(b []byte) error {
 
-	urlsets := urlSets{}
+	var urlsets [][]string
 	err := json.Unmarshal(b, &urlsets)
 	urlstore.urlsets = urlsets
 	return err
-	//return errors.New("hello")
-}
-
-func (s *urlStore) saveURL(url string) {
 }
 
 func (s *urlStore) save() {
+	//json.marshal
+	//writer.write()
 }
 
-func (s *urlStore) setURLAt(index int, url string) {
+func (s *urlStore) setURLAt(setIndex, urlIndex int, url string) {
+	s.urlsets[setIndex][urlIndex] = url
 }
 func (s *urlStore) deleteURLAt(index int) {
 }
 func (s *urlStore) addURL() {
+	//append string slice with dummy string value
 }
 
-func (s *urlStore) getUrls() []string {
+func (s *urlStore) getUrls(setIndex int) []string {
 	return nil
 }
 
-func (s *urlStore) loadURLSet2() {
-}
 func (s *urlStore) touch(filename string) {
 }

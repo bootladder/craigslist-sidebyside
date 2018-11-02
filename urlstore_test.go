@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_loadURLs_readFailed_returnsError(t *testing.T) {
@@ -30,17 +32,17 @@ func Test_loadURLs_badJSON_returnsError(t *testing.T) {
 func Test_loadURLs_goodJSON_OK(t *testing.T) {
 
 	jsonString := `
-	{
-		"arra": [
+	[
+		[
 			"http://boston.craigslist.org/jjj/?query=hello",
 			"http://portland.craigslist.org/jjj/?query=hello"
 		],
-		"arr": [
+		[
 			"http://austin.craigslist.org/jjj/?query=hello",
 			"http://houston.craigslist.org/jjj/?query=hello"
 		]
-	}
-	
+	]
+
 		`
 	usingMockReadFileSuccess([]byte(jsonString))
 	var urlstore urlStore
@@ -68,11 +70,24 @@ func Test_loadURLs_topJSONIsNotArray_Fails(t *testing.T) {
 	usingMockReadFileSuccess([]byte(jsonString))
 
 	err := urlstore.loadURLs()
-	if err != nil {
-		t.Errorf("expected no error, got error")
+	if err == nil {
+		t.Errorf("expected error, no error")
 	}
 }
 
+/////////////////////////////////////////////
+func Test_setUrlAt_storesUrlInArray_andCallsSave(t *testing.T) {
+	var urlstore urlStore
+	urlstore.urlsets = [][]string{{"orig1", "orig2"}, {"orig1", "orig2"}}
+	//var saveCalled bool
+	//var mockSave = func() { saveCalled = true }
+	//urlstore.save = mockSave
+	urlstore.On("save").Return()
+	urlstore.setURLAt(1, 1, "newurl")
+	assert.Equal(t, urlstore.urlsets[1][1], "newurl")
+}
+
+/////////////////////////////////////////////
 var mockreadfileBytes []byte
 var mockreadfileError error
 

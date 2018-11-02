@@ -21,6 +21,7 @@ var urlstore urlStore
 type craigslistRequest struct {
 	SearchURL   string `json:"searchURL"`
 	ColumnIndex int    `json:"columnIndex"`
+	SetIndex    int    `json:"setIndex"`
 }
 
 type craigslistDeleteRequest struct {
@@ -64,7 +65,7 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	resp.ResponseHTML = makeRequest(req.SearchURL)
 
 	//Save the URL
-	urlstore.setURLAt(req.ColumnIndex, req.SearchURL)
+	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
@@ -106,7 +107,7 @@ func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func writeResponseURLSet(w http.ResponseWriter, setIndex int) {
 
 	log.Printf("writeResponseURLSet(%d)\n", setIndex)
-	urlstore.loadURLSet2()
+	//urlstore.loadURLSet2()
 	returnURLsJSONResponse(w)
 }
 
@@ -130,7 +131,7 @@ func makeRequest(url string) string {
 
 func returnURLsJSONResponse(w http.ResponseWriter) {
 	var resp addUrlsResponse
-	resp.Urls = urlstore.getUrls()
+	//resp.Urls = urlstore.getUrls()
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
