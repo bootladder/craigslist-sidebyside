@@ -14,7 +14,6 @@ var pathToUrls = "/home/steve/craigslisturls.json"
 
 func (s *urlStore) loadURLs() error {
 	n, err := external.readfile(pathToUrls)
-	printf("the url string is : %v", string(n))
 	if err != nil {
 		return err
 	}
@@ -25,20 +24,16 @@ func (s *urlStore) loadURLs() error {
 
 func (s *urlStore) parseURLsFile(b []byte) error {
 
-	var urlsets [][]string
-	err := json.Unmarshal(b, &urlsets)
-	urlstore.urlsets = urlsets
+	err := json.Unmarshal(b, &s.urlsets)
 	return err
-}
-
-func (s *urlStore) save() {
-	//json.marshal
-	//writer.write()
 }
 
 func (s *urlStore) setURLAt(setIndex, urlIndex int, url string) {
 	s.urlsets[setIndex][urlIndex] = url
+	b, _ := json.Marshal(s.urlsets)
+	external.writefile(string(b))
 }
+
 func (s *urlStore) deleteURLAt(index int) {
 }
 func (s *urlStore) addURL() {

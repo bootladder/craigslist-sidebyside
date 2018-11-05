@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
 
@@ -52,10 +53,10 @@ func Test_loadURLs_goodJSON_OK(t *testing.T) {
 		t.Errorf("expected no error, got error: " + err.Error())
 	}
 
-	//expected := urlstore.urlsets[0].urls[0]
-	//if expected != "http://boston.craigslist.org/jjj/?query=hello" {
-	//	t.Errorf("expected string got no string")
-	//}
+	expected := urlstore.urlsets[0][0]
+	if expected != "http://boston.craigslist.org/jjj/?query=hello" {
+		t.Errorf("expected string got no string")
+	}
 }
 func Test_loadURLs_topJSONIsNotArray_Fails(t *testing.T) {
 
@@ -77,19 +78,25 @@ func Test_loadURLs_topJSONIsNotArray_Fails(t *testing.T) {
 
 /////////////////////////////////////////////
 func Test_setUrlAt_storesUrlInArray_andCallsSave(t *testing.T) {
+	external.writefile = mockWriteFile
 	var urlstore urlStore
+
 	urlstore.urlsets = [][]string{{"orig1", "orig2"}, {"orig1", "orig2"}}
-	//var saveCalled bool
-	//var mockSave = func() { saveCalled = true }
-	//urlstore.save = mockSave
-	urlstore.On("save").Return()
+	expectedURLSets := [][]string{{"orig1", "orig2"}, {"orig1", "newurl"}}
+	b, _ := json.Marshal(expectedURLSets)
+	jsonString := string(b)
+
 	urlstore.setURLAt(1, 1, "newurl")
+
 	assert.Equal(t, urlstore.urlsets[1][1], "newurl")
+	assert.Equal(t, mockwritefileString, jsonString)
 }
 
 /////////////////////////////////////////////
 var mockreadfileBytes []byte
 var mockreadfileError error
+
+var mockwritefileString string
 
 func mockReadFile(filename string) ([]byte, error) {
 	return mockreadfileBytes, mockreadfileError
@@ -107,4 +114,10 @@ func usingMockReadFileFail(err error) {
 	external.readfile = mockReadFile
 	mockreadfileError = err
 	mockreadfileBytes = []byte("doesn't matter")
+}
+
+func mockWriteFile(content string) error {
+
+	mockwritefileString = content
+	return errors.New("hello")
 }

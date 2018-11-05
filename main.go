@@ -183,5 +183,6 @@ func createPutHandler(msg string) httprouter.Handle {
 var external = externalFuncs{}
 
 type externalFuncs struct {
-	readfile func(string) ([]byte, error)
+	readfile  func(string) ([]byte, error)
+	writefile func(string) error
 }
