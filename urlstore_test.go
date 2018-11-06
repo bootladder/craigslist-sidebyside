@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -83,20 +84,19 @@ func Test_setUrlAt_storesUrlInArray_andCallsSave(t *testing.T) {
 
 	urlstore.urlsets = [][]string{{"orig1", "orig2"}, {"orig1", "orig2"}}
 	expectedURLSets := [][]string{{"orig1", "orig2"}, {"orig1", "newurl"}}
-	b, _ := json.Marshal(expectedURLSets)
-	jsonString := string(b)
+	jsonBytes, _ := json.Marshal(expectedURLSets)
 
 	urlstore.setURLAt(1, 1, "newurl")
 
 	assert.Equal(t, urlstore.urlsets[1][1], "newurl")
-	assert.Equal(t, mockwritefileString, jsonString)
+	assert.Equal(t, mockwritefileBytes, jsonBytes)
 }
 
 /////////////////////////////////////////////
 var mockreadfileBytes []byte
 var mockreadfileError error
 
-var mockwritefileString string
+var mockwritefileBytes []byte
 
 func mockReadFile(filename string) ([]byte, error) {
 	return mockreadfileBytes, mockreadfileError
@@ -116,8 +116,8 @@ func usingMockReadFileFail(err error) {
 	mockreadfileBytes = []byte("doesn't matter")
 }
 
-func mockWriteFile(content string) error {
+func mockWriteFile(filename string, content []byte, mode os.FileMode) error {
 
-	mockwritefileString = content
+	mockwritefileBytes = content
 	return errors.New("hello")
 }

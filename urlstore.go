@@ -35,7 +35,7 @@ func (s *urlStore) setURLAt(setIndex, urlIndex int, url string) {
 
 func (s *urlStore) saveUrlSets() {
 	b, _ := json.Marshal(s.urlsets)
-	external.writefile(string(b))
+	external.writefile(pathToUrls, b, 0)
 }
 
 func (s *urlStore) deleteURLAt(setIndex, urlIndex int) {

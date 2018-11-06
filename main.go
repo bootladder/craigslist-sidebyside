@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/browser"
@@ -174,5 +175,10 @@ var external = externalFuncs{}
 
 type externalFuncs struct {
 	readfile  func(string) ([]byte, error)
-	writefile func(string) error
+	writefile func(string, []byte, os.FileMode) error
+}
+
+func inject() {
+	external.readfile = ioutil.ReadFile
+	external.writefile = ioutil.WriteFile
 }
