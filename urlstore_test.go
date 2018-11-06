@@ -14,9 +14,7 @@ func Test_loadURLs_readFailed_returnsError(t *testing.T) {
 
 	usingMockReadFileFail(errors.New("fail reading"))
 	err := urlstore.loadURLs()
-	if err == nil {
-		t.Errorf("expected file io error, got nil")
-	}
+	assert.Error(t, err, "expected file io error, got nil")
 }
 func Test_loadURLs_badJSON_returnsError(t *testing.T) {
 	var urlstore urlStore
@@ -26,9 +24,7 @@ func Test_loadURLs_badJSON_returnsError(t *testing.T) {
 		`
 	usingMockReadFileSuccess([]byte(jsonString))
 	err := urlstore.loadURLs()
-	if err == nil {
-		t.Errorf("expected file io error, got nil")
-	}
+	assert.Error(t, err, "expected file io error, got nil")
 }
 
 func Test_loadURLs_goodJSON_OK(t *testing.T) {
@@ -43,21 +39,15 @@ func Test_loadURLs_goodJSON_OK(t *testing.T) {
 			"http://austin.craigslist.org/jjj/?query=hello",
 			"http://houston.craigslist.org/jjj/?query=hello"
 		]
-	]
-
-		`
+	] `
 	usingMockReadFileSuccess([]byte(jsonString))
 	var urlstore urlStore
 
 	err := urlstore.loadURLs()
-	if err != nil {
-		t.Errorf("expected no error, got error: " + err.Error())
-	}
+	assert.NoError(t, err, "expected no error, got error: ")
 
-	expected := urlstore.urlsets[0][0]
-	if expected != "http://boston.craigslist.org/jjj/?query=hello" {
-		t.Errorf("expected string got no string")
-	}
+	assert.Equal(t, urlstore.urlsets[0][0], "http://boston.craigslist.org/jjj/?query=hello")
+	assert.Equal(t, urlstore.urlsets[0][1], "http://portland.craigslist.org/jjj/?query=hello")
 }
 func Test_loadURLs_topJSONIsNotArray_Fails(t *testing.T) {
 

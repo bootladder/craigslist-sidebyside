@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -25,15 +26,16 @@ func (s *urlStore) loadURLs() error {
 func (s *urlStore) parseURLsFile(b []byte) error {
 
 	err := json.Unmarshal(b, &s.urlsets)
+	fmt.Printf("parseURLsFile: %v", s.urlsets)
 	return err
 }
 
 func (s *urlStore) setURLAt(setIndex, urlIndex int, url string) {
 	s.urlsets[setIndex][urlIndex] = url
-	s.saveUrlSets()
+	s.saveURLSets()
 }
 
-func (s *urlStore) saveUrlSets() {
+func (s *urlStore) saveURLSets() {
 	b, _ := json.Marshal(s.urlsets)
 	external.writefile(pathToUrls, b, 0)
 }
@@ -42,14 +44,10 @@ func (s *urlStore) deleteURLAt(setIndex, urlIndex int) {
 	set := s.urlsets[setIndex]
 	set = append(set[:urlIndex], set[(urlIndex+1):]...)
 	s.urlsets[setIndex] = set
-	s.saveUrlSets()
+	s.saveURLSets()
 }
 func (s *urlStore) addURL(setIndex int) {
 	s.urlsets[setIndex] = append(s.urlsets[setIndex], "http://boston.craigslist.org/jjj/?query=hello")
-}
-
-func (s *urlStore) getUrls(setIndex int) []string {
-	return nil
 }
 
 func (s *urlStore) touch(filename string) {

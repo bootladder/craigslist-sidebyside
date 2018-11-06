@@ -45,6 +45,7 @@ type returnURLSetResponse struct {
 
 func main() {
 
+	inject()
 	urlstore.loadURLs()
 
 	router := httprouter.New()

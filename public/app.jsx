@@ -17,8 +17,13 @@ class App extends React.Component {
     getCraigslistUrls(){
         console.log("     get craigslistURLS")
 
+        var myJsonRequestObj = {
+            setIndex: 0
+        };
+
         fetch("http://localhost:8080/api/" , {
             method: "GET"
+            //body: JSON.stringify(myJsonRequestObj)
         })
         .then(response => response.json())
         .then(data =>
