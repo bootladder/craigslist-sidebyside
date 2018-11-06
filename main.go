@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/browser"
@@ -23,16 +22,23 @@ type craigslistRequest struct {
 	ColumnIndex int    `json:"columnIndex"`
 	SetIndex    int    `json:"setIndex"`
 }
-
-type craigslistDeleteRequest struct {
-	ColumnIndex int `json:"columnIndex"`
-}
-
 type craigslistResponse struct {
 	ResponseHTML string `json:"response"`
 }
 
-type addUrlsResponse struct {
+type craigslistDeleteRequest struct {
+	ColumnIndex int `json:"columnIndex"`
+	SetIndex    int `json:"setIndex"`
+}
+
+type craigslistAddRequest struct {
+	SetIndex int `json:"setIndex"`
+}
+
+type craigslistGetRequest struct {
+	SetIndex int `json:"setIndex"`
+}
+type returnURLSetResponse struct {
 	Urls []string `json:"urls"`
 }
 
@@ -45,8 +51,7 @@ func main() {
 		http.Dir("public"))
 
 	router.POST("/api/", createPostHandler(""))
-	router.GET("/api/", createGetHandler(""))
-	router.GET("/api/:setIndex", getURLSet)
+	router.GET("/api/", getURLSet)
 	router.DELETE("/api/", createDeleteHandler(""))
 	router.PUT("/api/", createPutHandler(""))
 
@@ -64,7 +69,6 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var resp craigslistResponse
 	resp.ResponseHTML = makeRequest(req.SearchURL)
 
-	//Save the URL
 	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
 
 	jsonOut, err := json.Marshal(resp)
@@ -82,33 +86,26 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	fatal(err)
 	fmt.Printf("Delete: the index is %d\n", req.ColumnIndex)
 
-	urlstore.deleteURLAt(req.ColumnIndex)
+	urlstore.deleteURLAt(req.SetIndex, req.ColumnIndex)
 
-	returnURLsJSONResponse(w)
+	returnURLSetJSONResponse(w, req.SetIndex)
 }
 
 func putHandler(w http.ResponseWriter, r *http.Request) {
 
-	urlstore.addURL()
-	returnURLsJSONResponse(w)
-}
-
-func getHandler(w http.ResponseWriter, r *http.Request) {
-
-	returnURLsJSONResponse(w)
+	var req craigslistAddRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	fatal(err)
+	urlstore.addURL(req.SetIndex)
+	returnURLSetJSONResponse(w, req.SetIndex)
 }
 
 func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	i1, err := strconv.Atoi(ps.ByName("setIndex"))
+
+	var req craigslistGetRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
 	fatal(err)
-	writeResponseURLSet(w, i1)
-}
-
-func writeResponseURLSet(w http.ResponseWriter, setIndex int) {
-
-	log.Printf("writeResponseURLSet(%d)\n", setIndex)
-	//urlstore.loadURLSet2()
-	returnURLsJSONResponse(w)
+	returnURLSetJSONResponse(w, req.SetIndex)
 }
 
 func makeRequest(url string) string {
@@ -125,13 +122,12 @@ func makeRequest(url string) string {
 		log.Fatalln(err)
 	}
 
-	//log.Println(string(body))
 	return string(body)
 }
 
-func returnURLsJSONResponse(w http.ResponseWriter) {
-	var resp addUrlsResponse
-	//resp.Urls = urlstore.getUrls()
+func returnURLSetJSONResponse(w http.ResponseWriter, setIndex int) {
+	var resp returnURLSetResponse
+	resp.Urls = urlstore.urlsets[setIndex]
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
@@ -159,12 +155,6 @@ func printf(s string, a ...interface{}) {
 func createPostHandler(msg string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		postNoteHandler(w, r)
-	}
-}
-
-func createGetHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		getHandler(w, r)
 	}
 }
 

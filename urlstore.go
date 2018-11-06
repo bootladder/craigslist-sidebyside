@@ -30,14 +30,22 @@ func (s *urlStore) parseURLsFile(b []byte) error {
 
 func (s *urlStore) setURLAt(setIndex, urlIndex int, url string) {
 	s.urlsets[setIndex][urlIndex] = url
+	s.saveUrlSets()
+}
+
+func (s *urlStore) saveUrlSets() {
 	b, _ := json.Marshal(s.urlsets)
 	external.writefile(string(b))
 }
 
-func (s *urlStore) deleteURLAt(index int) {
+func (s *urlStore) deleteURLAt(setIndex, urlIndex int) {
+	set := s.urlsets[setIndex]
+	set = append(set[:urlIndex], set[(urlIndex+1):]...)
+	s.urlsets[setIndex] = set
+	s.saveUrlSets()
 }
-func (s *urlStore) addURL() {
-	//append string slice with dummy string value
+func (s *urlStore) addURL(setIndex int) {
+	s.urlsets[setIndex] = append(s.urlsets[setIndex], "http://boston.craigslist.org/jjj/?query=hello")
 }
 
 func (s *urlStore) getUrls(setIndex int) []string {
