@@ -26,6 +26,21 @@ func Test_loadURLs_badJSON_returnsError(t *testing.T) {
 	err := urlstore.loadURLs()
 	assert.Error(t, err, "expected file io error, got nil")
 }
+func Test_loadURLs_topJSONIsNotArray_Fails(t *testing.T) {
+
+	jsonString := `
+	{
+		"validjson" : "butNotAnArray"
+	}
+	
+	`
+	var urlstore urlStore
+
+	usingMockReadFileSuccess([]byte(jsonString))
+
+	err := urlstore.loadURLs()
+	assert.Error(t, err, "expected file io error, got nil")
+}
 
 func Test_loadURLs_goodJSON_OK(t *testing.T) {
 
@@ -48,26 +63,10 @@ func Test_loadURLs_goodJSON_OK(t *testing.T) {
 
 	assert.Equal(t, urlstore.urlsets[0][0], "http://boston.craigslist.org/jjj/?query=hello")
 	assert.Equal(t, urlstore.urlsets[0][1], "http://portland.craigslist.org/jjj/?query=hello")
-}
-func Test_loadURLs_topJSONIsNotArray_Fails(t *testing.T) {
-
-	jsonString := `
-	{
-		"validjson" : "butNotAnArray"
-	}
-	
-	`
-	var urlstore urlStore
-
-	usingMockReadFileSuccess([]byte(jsonString))
-
-	err := urlstore.loadURLs()
-	if err == nil {
-		t.Errorf("expected error, no error")
-	}
+	assert.Equal(t, urlstore.urlsets[1][0], "http://austin.craigslist.org/jjj/?query=hello")
+	assert.Equal(t, urlstore.urlsets[1][1], "http://houston.craigslist.org/jjj/?query=hello")
 }
 
-/////////////////////////////////////////////
 func Test_setUrlAt_storesUrlInArray_andCallsSave(t *testing.T) {
 	external.writefile = mockWriteFile
 	var urlstore urlStore
@@ -79,6 +78,35 @@ func Test_setUrlAt_storesUrlInArray_andCallsSave(t *testing.T) {
 	urlstore.setURLAt(1, 1, "newurl")
 
 	assert.Equal(t, urlstore.urlsets[1][1], "newurl")
+	assert.Equal(t, mockwritefileBytes, jsonBytes)
+}
+
+func Test_deleteUrlAt_removesFromArray_andCallsSave(t *testing.T) {
+	external.writefile = mockWriteFile
+	var urlstore urlStore
+
+	urlstore.urlsets = [][]string{{"orig1", "orig2"}, {"orig1", "orig2"}}
+	expectedURLSets := [][]string{{"orig2"}, {"orig1", "orig2"}}
+	jsonBytes, _ := json.Marshal(expectedURLSets)
+
+	urlstore.deleteURLAt(0, 0)
+
+	assert.Equal(t, urlstore.urlsets, expectedURLSets)
+	assert.Equal(t, mockwritefileBytes, jsonBytes)
+}
+
+func Test_addURL_addsToArray_andCallsSave(t *testing.T) {
+	external.writefile = mockWriteFile
+	var urlstore urlStore
+
+	urlstore.urlsets = [][]string{{"orig1"}, {"orig1", "orig2"}}
+	expectedURLSets := [][]string{{"orig1", "http://boston.craigslist.org/jjj/?query=hello"}, {"orig1", "orig2"}}
+
+	jsonBytes, _ := json.Marshal(expectedURLSets)
+
+	urlstore.addURL(0)
+
+	assert.Equal(t, expectedURLSets, urlstore.urlsets)
 	assert.Equal(t, mockwritefileBytes, jsonBytes)
 }
 
