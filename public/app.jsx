@@ -1,7 +1,6 @@
 class App extends React.Component {
     constructor(props) {
       super(props);
-      this.getCraigslistUrls = this.getCraigslistUrls.bind(this);
       this.addButtonClicked = this.addButtonClicked.bind(this);
       this.doDeleteRequest = this.doDeleteRequest.bind(this);
       this.getCraigslistUrlSet = this.getCraigslistUrlSet.bind(this);
@@ -12,25 +11,9 @@ class App extends React.Component {
     }
     componentDidMount(){
         console.log("app mounted")
-        this.getCraigslistUrls()
+        this.getCraigslistUrlSet(0)
     }
-    getCraigslistUrls(){
-        console.log("     get craigslistURLS")
 
-        var myJsonRequestObj = {
-            setIndex: 0
-        };
-
-        fetch("http://localhost:8080/api/" , {
-            method: "GET"
-            //body: JSON.stringify(myJsonRequestObj)
-        })
-        .then(response => response.json())
-        .then(data =>
-            this.updateUrls(data.urls)
-        )
-        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
-    }
     getCraigslistUrlSet(setIndex){
         console.log("getCraigslistUrlSet: index " + setIndex)
         fetch("http://localhost:8080/api/" + setIndex , {

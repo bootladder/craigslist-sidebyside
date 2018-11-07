@@ -136,7 +136,7 @@ class CraigslistQueryColumn extends React.Component {
     doRequest(index, craigslistSearchURL){
         console.log("do request" + craigslistSearchURL + " state is " + JSON.stringify(this.state))
         var validatedURL = this.validateCraigslistURL(craigslistSearchURL)
-        console.log("validatedURL: " + this.validatedURL)
+        console.log("validatedURL: " + validatedURL)
 
         var myJsonRequestObj = {
             searchURL: encodeURIComponent(craigslistSearchURL),

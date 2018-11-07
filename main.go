@@ -66,7 +66,9 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 
 	var req craigslistRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
-	req.SearchURL, _ = url.QueryUnescape(req.SearchURL)
+	fatal(err)
+	req.SearchURL, err = url.QueryUnescape(req.SearchURL)
+	fatal(err)
 	fmt.Printf("POST URL: index is %d\n", req.ColumnIndex)
 
 	var resp craigslistResponse
