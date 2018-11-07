@@ -15,6 +15,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var debug = true
+
 var err error
 
 var urlstore urlStore
@@ -72,7 +74,12 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("POST URL: index is %d\n", req.ColumnIndex)
 
 	var resp craigslistResponse
-	resp.ResponseHTML = makeRequest(req.SearchURL)
+
+	if debug == true {
+		resp.ResponseHTML = "<b>HELLO RESPONSE</b>"
+	} else {
+		resp.ResponseHTML = makeRequest(req.SearchURL)
+	}
 
 	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
 
@@ -100,7 +107,8 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 
 	var req craigslistAddRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
-	fatal(err)
+	fatal(err, "JSON Decode Put Handler Body")
+	fmt.Printf("Add(Put): the index is %d\n", req.SetIndex)
 	urlstore.addURL(req.SetIndex)
 	returnURLSetJSONResponse(w, req.SetIndex)
 }
@@ -134,7 +142,7 @@ func returnURLSetJSONResponse(w http.ResponseWriter, setIndex int) {
 	var resp returnURLSetResponse
 	resp.Urls = urlstore.urlsets[setIndex]
 
-	jsonOut, err := json.Marshal(resp)
+	jsonOut, err := json.MarshalIndent(resp, "", "  ")
 	fatal(err)
 
 	w.Header().Set("Content-Type", "application/json")

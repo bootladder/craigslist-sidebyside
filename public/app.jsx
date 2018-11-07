@@ -56,11 +56,20 @@ class App extends React.Component {
         return children
     }
 
-    addButtonClicked(e) {
+    addButtonClicked(setIndex) {
         console.log("Add Button Clicked")
 
+        var myJsonRequestObj = {
+            setIndex: setIndex
+        };
+
         fetch("http://localhost:8080/api/" , {
-            method: "PUT"
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(myJsonRequestObj)
         })
         .then(response => response.json())
         .then(data =>
@@ -97,7 +106,7 @@ class App extends React.Component {
         return (
             <div>
                 <h1>This is the App</h1>
-                <Button onClick={this.addButtonClicked} size="small" color="primary">Add New Column</Button>
+                <Button onClick={()=>this.addButtonClicked(globals.currentSetIndex)} size="small" color="primary">Add New Column</Button>
                 <Button onClick={()=>this.getCraigslistUrlSet(1)} size="small" color="primary">Load URL Set #1</Button>
                 <Button onClick={()=>this.getCraigslistUrlSet(2)} size="small" color="primary">Load URL Set #2</Button>
                 <hr/>

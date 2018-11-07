@@ -30,7 +30,7 @@ func (s *urlStore) setURLAt(setIndex, urlIndex int, url string) {
 }
 
 func (s *urlStore) saveURLSetsToFile() {
-	b, _ := json.Marshal(s.urlsets)
+	b, _ := json.MarshalIndent(s.urlsets, "", "  ")
 	external.writefile(pathToUrls, b, 0)
 }
 
