@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/browser"
@@ -53,7 +54,7 @@ func main() {
 		http.Dir("public"))
 
 	router.POST("/api/", createPostHandler(""))
-	router.GET("/api/", getURLSet)
+	router.GET("/api/:setIndex", getURLSet)
 	router.DELETE("/api/", createDeleteHandler(""))
 	router.PUT("/api/", createPutHandler(""))
 
@@ -104,10 +105,10 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 
 func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	var req craigslistGetRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	setIndexString := ps.ByName("setIndex")
+	setIndex, err := strconv.Atoi(setIndexString)
 	fatal(err)
-	returnURLSetJSONResponse(w, req.SetIndex)
+	returnURLSetJSONResponse(w, setIndex)
 }
 
 func makeRequest(url string) string {
