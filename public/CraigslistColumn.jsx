@@ -23,13 +23,14 @@ class CraigslistQueryColumnUserInput extends React.Component {
         }
     }
     loadButtonClicked(){
-        console.log("the columnIndex is "+this.props.columnIndex)
+        console.log("loadButtonClicked: doRequest: columnIndex: "+this.props.columnIndex + "URL: "+this.URLInput.controlEl.value)
         this.props.doRequest(this.props.columnIndex,this.URLInput.controlEl.value)
     }
     deleteButtonClicked(){
         console.log("deletebuttonclicked: columnIndex:  " + this.props.columnIndex)
         this.props.doDeleteRequest(this.props.columnIndex)
     }
+///////////////////////////////////
     categorySelectorSelected(e){
         console.log("categorySelector Selected" + JSON.stringify(e))
         this.setState({ category: e })
@@ -50,45 +51,46 @@ class CraigslistQueryColumnUserInput extends React.Component {
         this.setState({ query: this.queryInput.controlEl.value })
         this.URLInput.controlEl.value = this.createCraigslistURL(this.state.city,this.state.category,this.queryInput.controlEl.value)
     }
-
     createCraigslistURL(city,category,query){
-        return "http://"+city+".craigslist.org/search/"+category+"?query="+query
+        return "http://"+city+".craigslist.org/search/"+category+"?sort=date&query="+query
     }
+/////////////////////////////////
 
     componentDidMount(){
         console.log("UserInput componentDidMount() : column doRequest with: "+this.props.url)
         this.props.doRequest(this.props.columnIndex,this.props.url)
     }
-
     componentDidUpdate(){
         console.log("UserInput componentDidUpdate() : set UI input text: "+this.props.url)
         this.URLInput.controlEl.value = this.props.url
     }
+/////////////////////////////////
+
     render() {
-        console.log("render CraigslistQueryUserInput: " + JSON.stringify(this.props))
+        console.log("     render CraigslistQueryUserInput: " + JSON.stringify(this.props))
         return (
-<div>
-    <Container>
-    <Row>
-        <Input className="mui--text-caption input-100percent" 
-                ref={el => { this.URLInput = el; }} 
-                placeholder="Craigslist Search URL" />
-    </Row>
-    <Row>
-        <Input className="input-100percent" placeholder="Search Query"
-                ref={el => { this.queryInput = el; }} 
-                onChange={this.queryInputEvent} />
-    </Row>
-    <Row>
-        <CategorySelector categorySelectorSelected={this.categorySelectorSelected} myprop="myprop"/>
-        <CitySelector citySelectorSelected={this.citySelectorSelected} cityInputEvent={this.cityInputEvent}/>
-    </Row>
-    <Row>
-        <Button onClick={this.loadButtonClicked} size="small" color="primary">Load Results and Save URL</Button>
-        <Button onClick={this.deleteButtonClicked} size="small" color="primary">Delete this Column</Button>
-    </Row>
-    </Container>
-</div>
+            <div>
+                <Container>
+                <Row>
+                    <Input className="mui--text-caption input-100percent" 
+                            ref={el => { this.URLInput = el; }} 
+                            placeholder="Craigslist Search URL" />
+                </Row>
+                <Row>
+                    <Input className="input-100percent" placeholder="Search Query"
+                            ref={el => { this.queryInput = el; }} 
+                            onChange={this.queryInputEvent} />
+                </Row>
+                <Row>
+                    <CategorySelector categorySelectorSelected={this.categorySelectorSelected} />
+                    <CitySelector citySelectorSelected={this.citySelectorSelected} cityInputEvent={this.cityInputEvent}/>
+                </Row>
+                <Row>
+                    <Button onClick={this.loadButtonClicked} size="small" color="primary">Load Results and Save URL</Button>
+                    <Button onClick={this.deleteButtonClicked} size="small" color="primary">Delete this Column</Button>
+                </Row>
+                </Container>
+            </div>
         );
     }
 }
@@ -96,6 +98,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
 class CraigslistQueryColumnResults extends React.Component {
 
     render() {
+        console.log("     render CraigslistQueryColumnResults")
         const html = $.parseHTML( this.props.results )
         
         var resultRows = []
@@ -160,19 +163,14 @@ class CraigslistQueryColumn extends React.Component {
         })
         .then(response => response.json())
         .then(data =>
-            this.setState({
-                users: data,
-                queryResponseData: data.response,
-                message: "ok!!",
-                dummystate: "ok finally changed state up here!!",
-          })
+            this.setState({ queryResponseData: data.response })
         )
         .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
         ;
     }
 
     render() {
-        console.log("render CraigslistQueryColumn: " + JSON.stringify(this.props))
+        console.log("     render CraigslistQueryColumn: " + JSON.stringify(this.props))
         return (
             <div>
                 <div className="mui--text-left">
@@ -183,11 +181,7 @@ class CraigslistQueryColumn extends React.Component {
                         columnIndex={this.props.columnIndex}
                         />
                 </div>
-                <CraigslistQueryColumnResults 
-                    results={this.state.queryResponseData}
-                    hello="hello" 
-                    myprop="<b>zwatef</b>"
-                />
+                <CraigslistQueryColumnResults results={this.state.queryResponseData} />
             </div>
         );
     }
