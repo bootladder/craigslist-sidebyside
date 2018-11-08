@@ -57,7 +57,7 @@ class App extends React.Component {
     }
 
     addButtonClicked(setIndex) {
-        console.log("Add Button Clicked")
+        console.log("Add Button Clicked with setIndex: " + setIndex)
 
         var myJsonRequestObj = {
             setIndex: setIndex
@@ -79,9 +79,10 @@ class App extends React.Component {
     }
 
     doDeleteRequest(index) {
-        console.log("Delete Button Clicked")
+        console.log("Delete Button Clicked, currentSetIndex: " + globals.currentSetIndex + " columnIndex: " + index)
 
         var myJsonRequestObj = {
+            setIndex: globals.currentSetIndex,
             columnIndex: index
         };
         fetch("http://localhost:8080/api/" , {

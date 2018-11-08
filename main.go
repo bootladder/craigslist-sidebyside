@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var debug = true
+var debug = false
 
 var err error
 

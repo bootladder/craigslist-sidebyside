@@ -41,7 +41,7 @@ func (s *urlStore) deleteURLAt(setIndex, urlIndex int) {
 	s.saveURLSetsToFile()
 }
 func (s *urlStore) addURL(setIndex int) {
-	s.urlsets[setIndex] = append(s.urlsets[setIndex], "http://boston.craigslist.org/jjj/?query=hello")
+	s.urlsets[setIndex] = append(s.urlsets[setIndex], "http://boston.craigslist.org/search/jjj/?sort=date&query=engineer")
 	s.saveURLSetsToFile()
 }
 
