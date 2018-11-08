@@ -21,24 +21,23 @@ var err error
 
 var urlstore urlStore
 
-type craigslistRequest struct {
+type craigslistPostRequest struct {
 	SearchURL   string `json:"searchURL"`
 	ColumnIndex int    `json:"columnIndex"`
 	SetIndex    int    `json:"setIndex"`
 }
-type craigslistResponse struct {
-	ResponseHTML string `json:"response"`
+type craigslistPostResponse struct {
+	ResponseHTML string   `json:"response"`
+	Urls         []string `json:"urls"`
 }
 
 type craigslistDeleteRequest struct {
 	ColumnIndex int `json:"columnIndex"`
 	SetIndex    int `json:"setIndex"`
 }
-
 type craigslistAddRequest struct {
 	SetIndex int `json:"setIndex"`
 }
-
 type craigslistGetRequest struct {
 	SetIndex int `json:"setIndex"`
 }
@@ -66,14 +65,14 @@ func main() {
 
 func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 
-	var req craigslistRequest
+	var req craigslistPostRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	fatal(err)
 	req.SearchURL, err = url.QueryUnescape(req.SearchURL)
 	fatal(err)
 	fmt.Printf("POST URL: SetIndex: %d , ColumnIndex: %d\n", req.SetIndex, req.ColumnIndex)
 
-	var resp craigslistResponse
+	var resp craigslistPostResponse
 
 	if debug == true {
 		resp.ResponseHTML = "<b>HELLO RESPONSE</b>"
@@ -82,6 +81,8 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
+
+	resp.Urls = urlstore.urlsets[req.SetIndex]
 
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
