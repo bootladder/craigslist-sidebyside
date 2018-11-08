@@ -20,17 +20,19 @@ class App extends React.Component {
             method: "GET"
         })
         .then(response => response.json())
-        .then(data =>
+        .then(data => {
             this.updateUrls(data.urls)
+            globals.currentSetIndex = setIndex
+        }
         )
         .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
     }
     updateUrls(urls) {
         console.log("     updateUrls: "+ urls)
-        var c = this.makeChildren(urls)
+        //var c = this.makeChildren(urls)
         this.setState({
             urls: urls,
-            children: c
+            //children: c
         })
     }
 
@@ -108,14 +110,14 @@ class App extends React.Component {
             <div>
                 <h1>This is the App</h1>
                 <Button onClick={()=>this.addButtonClicked(globals.currentSetIndex)} size="small" color="primary">Add New Column</Button>
-                <Button onClick={()=>this.getCraigslistUrlSet(1)} size="small" color="primary">Load URL Set #1</Button>
-                <Button onClick={()=>this.getCraigslistUrlSet(2)} size="small" color="primary">Load URL Set #2</Button>
+                <Button onClick={()=>this.getCraigslistUrlSet(0)} size="small" color="primary">Load URL Set #1</Button>
+                <Button onClick={()=>this.getCraigslistUrlSet(1)} size="small" color="primary">Load URL Set #2</Button>
                 <hr/>
                 <div className="search-table-outter wrapper">
                 <table className="search-table inner">
             <tbody>
         <tr>
-            {this.state.children}
+            {this.makeChildren(this.state.urls)}
         </tr>
             </tbody>
                 </table>

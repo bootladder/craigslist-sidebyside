@@ -71,7 +71,7 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	fatal(err)
 	req.SearchURL, err = url.QueryUnescape(req.SearchURL)
 	fatal(err)
-	fmt.Printf("POST URL: index is %d\n", req.ColumnIndex)
+	fmt.Printf("POST URL: SetIndex: %d , ColumnIndex: %d\n", req.SetIndex, req.ColumnIndex)
 
 	var resp craigslistResponse
 

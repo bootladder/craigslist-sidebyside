@@ -56,12 +56,13 @@ class CraigslistQueryColumnUserInput extends React.Component {
     }
 
     componentDidMount(){
-        this.URLInput.controlEl.value = this.props.url
-        this.props.doRequest(this.props.columnIndex,this.props.url)
         console.log("UserInput componentDidMount() : column doRequest with: "+this.props.url)
+        this.props.doRequest(this.props.columnIndex,this.props.url)
     }
+
     componentDidUpdate(){
-        console.log("UserInput componentDidUpdate()" )
+        console.log("UserInput componentDidUpdate() : set UI input text: "+this.props.url)
+        this.URLInput.controlEl.value = this.props.url
     }
     render() {
         console.log("render CraigslistQueryUserInput: " + JSON.stringify(this.props))
@@ -125,8 +126,12 @@ class CraigslistQueryColumn extends React.Component {
         queryResponseData: "queryResponseData"
     }
 
+    componentWillReceiveProps(){
+        console.log("Top Column componentWilLReceiveProps()")
+        this.doRequest(this.props.index,this.props.url)
+    }
+
     validateCraigslistURL(url){
-        console.log(JSON.stringify(url))
         if(url.length < 5){
             console.log("length too short, defaulting URL length was "+url.length)
             return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
@@ -134,12 +139,14 @@ class CraigslistQueryColumn extends React.Component {
         else return url;
     }
     doRequest(index, craigslistSearchURL){
-        console.log("do request" + craigslistSearchURL + " state is " + JSON.stringify(this.state))
+        console.log("do request : index: " +index + " URL: " + craigslistSearchURL )
+        console.log("      state is " + JSON.stringify(this.state))
         var validatedURL = this.validateCraigslistURL(craigslistSearchURL)
-        console.log("validatedURL: " + validatedURL)
+        console.log("      validatedURL: " + validatedURL)
 
         var myJsonRequestObj = {
             searchURL: encodeURIComponent(craigslistSearchURL),
+            setIndex: globals.currentSetIndex,
             columnIndex: index
         };
 
