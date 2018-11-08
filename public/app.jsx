@@ -38,8 +38,6 @@ class App extends React.Component {
 
     makeChildren(urls) {
         console.log("     makeChildren: making "+urls.length+"chilrden")
-        console.log(" TEST: does children exist? ")
-        console.log(JSON.stringify(children))
 
         let children = []
         for (let j = 0; j < urls.length; j++) {

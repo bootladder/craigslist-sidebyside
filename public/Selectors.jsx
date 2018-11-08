@@ -10,7 +10,7 @@ class CategorySelector extends React.Component {
         this.props.categorySelectorSelected(e.target.value);
     }
     render() {
-        console.log("render CategorySelector: " + JSON.stringify(this.props))
+        console.log("     render CategorySelector: " + JSON.stringify(this.props))
         return (
             <div>
                 <select id="catAbb" onChange={this.change} defaultValue="1">
@@ -45,7 +45,7 @@ class CitySelector extends React.Component {
         this.props.cityInputEvent(this.cityInput.controlEl.value)
     }
     render() {
-        console.log("render CitySelector: " + JSON.stringify(this.props))
+        console.log("     render CitySelector: " + JSON.stringify(this.props))
         return (
             <div>
                 <select id="areaAbb" className="js-only" onChange={this.change} defaultValue="1">
