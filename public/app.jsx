@@ -4,9 +4,11 @@ class App extends React.Component {
       this.addButtonClicked = this.addButtonClicked.bind(this);
       this.doDeleteRequest = this.doDeleteRequest.bind(this);
       this.getCraigslistUrlSet = this.getCraigslistUrlSet.bind(this);
+      this.doRequest = this.doRequest.bind(this);
     }
     state = {
         urls: [],
+        columns: [],
         children: <td>hello</td>
     }
     componentDidMount(){
@@ -21,41 +23,47 @@ class App extends React.Component {
         })
         .then(response => response.json())
         .then(data => {
-            this.updateUrls(data.urls)
+            this.updateColumns(data.urls)
             globals.currentSetIndex = setIndex
         }
         )
         .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
     }
-    updateUrls(urls) {
-        console.log("     updateUrls: "+ urls)
-        //var c = this.makeChildren(urls)
+
+    updateColumns(urls){
+        let newColumns = []
+        for(let j=0;j<urls.length;j++){
+            let newColumn = {url: urls[j], response:"<b>hello</b>"}
+            newColumns.push(newColumn)
+        }
+        console.log("updateColumns: columns: "+ JSON.stringify(newColumns))
         this.setState({
-            urls: urls,
-            //children: c
+            columns: newColumns
         })
     }
 
-    makeChildren(urls) {
-        console.log("     makeChildren: making "+urls.length+"chilrden")
+    makeColumns(columnInfos) {
+        console.log("     makeColumns: making "+columnInfos.length+"columns")
 
-        let children = []
-        for (let j = 0; j < urls.length; j++) {
+        let columns = []
+        for (let j = 0; j < columnInfos.length; j++) {
             globals.key = globals.key + 1
-            children.push(
+            columns.push(
 <td key={j}>
     <div>
         <CraigslistQueryColumn 
-            url={urls[j]}
+            url={columnInfos[j].url}
+            response={columnInfos[j].response}
             columnIndex={j}
             doDeleteRequest={this.doDeleteRequest}
             globalKey={globals.key}
+            doRequest={this.doRequest}
             />
     </div>
 </td> 
             )
         }
-        return children
+        return columns
     }
 
     addButtonClicked(setIndex) {
@@ -75,7 +83,7 @@ class App extends React.Component {
         })
         .then(response => response.json())
         .then(data =>
-            this.updateUrls(data.urls)
+            this.updateColumns(data.urls)
         )
         .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
     }
@@ -97,9 +105,52 @@ class App extends React.Component {
         })
         .then(response => response.json())
         .then(data =>
-            this.updateUrls(data.urls)
+            this.updateColumns(data.urls)
         )
         .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }));
+    }
+
+    validateCraigslistURL(url){
+        if(url.length < 5){
+            console.log("length too short, defaulting URL length was "+url.length)
+            return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
+        }
+        else return url;
+    }
+    doRequest(index, craigslistSearchURL){
+        console.log("do request : index: " +index + " URL: " + craigslistSearchURL )
+        console.log("      state is " + JSON.stringify(this.state))
+        var validatedURL = this.validateCraigslistURL(craigslistSearchURL)
+        console.log("      validatedURL: " + validatedURL)
+
+        var myJsonRequestObj = {
+            searchURL: encodeURIComponent(craigslistSearchURL),
+            setIndex: globals.currentSetIndex,
+            columnIndex: index
+        };
+
+        fetch("http://localhost:8080/api/" , {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: JSON.stringify(myJsonRequestObj)
+        })
+        .then(response => response.json())
+        .then(data =>{
+            let newColumns = this.state.columns
+            newColumns[index].url = craigslistSearchURL
+            newColumns[index].response = data.response
+            this.setState({ 
+                columns: newColumns,
+                queryResponseData: data.response 
+            })
+
+        }
+        )
+        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
+        ;
     }
 
     render() {
@@ -117,7 +168,7 @@ class App extends React.Component {
                 <table className="search-table inner">
             <tbody>
         <tr>
-            {this.makeChildren(this.state.urls)}
+            {this.makeColumns(this.state.columns)}
         </tr>
             </tbody>
                 </table>

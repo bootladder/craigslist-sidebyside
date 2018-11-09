@@ -120,53 +120,9 @@ class CraigslistQueryColumnResults extends React.Component {
 
 class CraigslistQueryColumn extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.doRequest = this.doRequest.bind(this);
-    }
-
-    state = {
-        queryResponseData: "queryResponseData"
-    }
-
     componentWillReceiveProps(){
         console.log("Top Column componentWilLReceiveProps()")
-        this.doRequest(this.props.index,this.props.url)
-    }
-
-    validateCraigslistURL(url){
-        if(url.length < 5){
-            console.log("length too short, defaulting URL length was "+url.length)
-            return "https://baltimore.craigslist.org/d/architect-engineer-cad/search/egr";
-        }
-        else return url;
-    }
-    doRequest(index, craigslistSearchURL){
-        console.log("do request : index: " +index + " URL: " + craigslistSearchURL )
-        console.log("      state is " + JSON.stringify(this.state))
-        var validatedURL = this.validateCraigslistURL(craigslistSearchURL)
-        console.log("      validatedURL: " + validatedURL)
-
-        var myJsonRequestObj = {
-            searchURL: encodeURIComponent(craigslistSearchURL),
-            setIndex: globals.currentSetIndex,
-            columnIndex: index
-        };
-
-        fetch("http://localhost:8080/api/" , {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method: "POST",
-            body: JSON.stringify(myJsonRequestObj)
-        })
-        .then(response => response.json())
-        .then(data =>
-            this.setState({ queryResponseData: data.response })
-        )
-        .catch(error => this.setState({ error: JSON.stringify(error), message: "something bad happened"+JSON.stringify(error.message) }))
-        ;
+        //this.doRequest(this.props.index,this.props.url)
     }
 
     render() {
@@ -175,13 +131,13 @@ class CraigslistQueryColumn extends React.Component {
             <div>
                 <div className="mui--text-left">
                     <CraigslistQueryColumnUserInput 
-                        doRequest={this.doRequest}
+                        doRequest={this.props.doRequest}
                         doDeleteRequest={this.props.doDeleteRequest}
                         url={this.props.url}
                         columnIndex={this.props.columnIndex}
                         />
                 </div>
-                <CraigslistQueryColumnResults results={this.state.queryResponseData} />
+                <CraigslistQueryColumnResults results={this.props.response} />
             </div>
         );
     }
