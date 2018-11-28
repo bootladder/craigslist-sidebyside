@@ -34,6 +34,7 @@ class CraigslistQueryColumnUserInput extends React.Component {
     categorySelectorSelected(e){
         console.log("categorySelector Selected" + JSON.stringify(e))
         this.setState({ category: e })
+        console.log("state is:  " + JSON.stringify(this.state))
         this.URLInput.controlEl.value = this.createCraigslistURL(this.state.city,e,this.state.query)
     }
     citySelectorSelected(e){
@@ -59,9 +60,6 @@ class CraigslistQueryColumnUserInput extends React.Component {
     componentDidMount(){
         console.log("UserInput componentDidMount() : column doRequest with: "+this.props.url)
         this.props.doRequest(this.props.columnIndex,this.props.url)
-    }
-    componentDidUpdate(){
-        console.log("UserInput componentDidUpdate() : set UI input text: "+this.props.url)
         this.URLInput.controlEl.value = this.props.url
     }
 /////////////////////////////////
@@ -98,8 +96,9 @@ class CraigslistQueryColumnUserInput extends React.Component {
 class CraigslistQueryColumnResults extends React.Component {
 
     render() {
-        console.log("     render CraigslistQueryColumnResults")
+        console.log("     render CraigslistQueryColumnResults is: " + this.props.results)
         const html = $.parseHTML( this.props.results )
+        console.log("     HTML: "  + JSON.stringify(html))
         
         var resultRows = []
         var i=0
@@ -120,13 +119,11 @@ class CraigslistQueryColumnResults extends React.Component {
 
 class CraigslistQueryColumn extends React.Component {
 
-    componentWillReceiveProps(){
+    componentDidUpdate(){
         console.log("Top Column componentWilLReceiveProps()")
-        //this.doRequest(this.props.index,this.props.url)
     }
 
     render() {
-        console.log("     render CraigslistQueryColumn: " + JSON.stringify(this.props))
         return (
             <div>
                 <div className="mui--text-left">

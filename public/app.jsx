@@ -33,7 +33,7 @@ class App extends React.Component {
     updateColumns(urls){
         let newColumns = []
         for(let j=0;j<urls.length;j++){
-            let newColumn = {url: urls[j], response:"<b>hello</b>"}
+            let newColumn = {url: urls[j]}
             newColumns.push(newColumn)
         }
         console.log("updateColumns: columns: "+ JSON.stringify(newColumns))
@@ -119,9 +119,6 @@ class App extends React.Component {
     }
     doRequest(index, craigslistSearchURL){
         console.log("do request : index: " +index + " URL: " + craigslistSearchURL )
-        console.log("      state is " + JSON.stringify(this.state))
-        var validatedURL = this.validateCraigslistURL(craigslistSearchURL)
-        console.log("      validatedURL: " + validatedURL)
 
         var myJsonRequestObj = {
             searchURL: encodeURIComponent(craigslistSearchURL),
