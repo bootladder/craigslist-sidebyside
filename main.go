@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var debug = false
+var debug = true
 
 var err error
 
@@ -75,7 +75,10 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var resp craigslistPostResponse
 
 	if debug == true {
-		resp.ResponseHTML = `<html><body><ul><li class="result-row" data-pid="6744258112"> Wow cool </li></ul></body></html>`
+		resp.ResponseHTML =
+			`<html><body><ul><li class="result-row" data-pid="6744258112">` +
+				` Wow cool ` + req.SearchURL +
+				` </li></ul></body></html>`
 
 	} else {
 		resp.ResponseHTML = makeRequest(req.SearchURL)

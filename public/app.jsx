@@ -8,8 +8,7 @@ class App extends React.Component {
     }
     state = {
         urls: [],
-        columns: [],
-        children: <td>hello</td>
+        columns: []
     }
     componentDidMount(){
         console.log("app mounted")
@@ -36,7 +35,7 @@ class App extends React.Component {
             let newColumn = {url: urls[j]}
             newColumns.push(newColumn)
         }
-        console.log("updateColumns: columns: "+ JSON.stringify(newColumns))
+        console.log("updateColumns (will setState): columns: "+ JSON.stringify(newColumns))
         this.setState({
             columns: newColumns
         })
@@ -140,8 +139,7 @@ class App extends React.Component {
             newColumns[index].url = craigslistSearchURL
             newColumns[index].response = data.response
             this.setState({ 
-                columns: newColumns,
-                queryResponseData: data.response 
+                columns: newColumns
             })
 
         }
@@ -151,7 +149,7 @@ class App extends React.Component {
     }
 
     render() {
-        console.log("rendering app with state " + JSON.stringify(this.state))
+        console.log("rendering app with state " + JSON.stringify(this.state, null, 2))
         console.log("                   urls " + JSON.stringify(this.state.urls))
 
         return (
