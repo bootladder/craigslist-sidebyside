@@ -9,6 +9,7 @@ import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
 import Bootstrap.Button as Button
 import Bootstrap.Utilities.Spacing as Spacing
+import Http
 
 -- MAIN
 main =
@@ -21,11 +22,12 @@ type alias Model =
     { name : String
     , password : String
     , passwordAgain : String
+    , queryResult : String
     }
 
 init : () -> ( Model, Cmd Msg)
 init _ =
-    (Model "" "" ""
+    (Model "" "" "" ""
     , Cmd.none
     )
 
@@ -34,6 +36,8 @@ type Msg
   = Name String
   | Password String
   | PasswordAgain String
+  | LoadButtonPressed String
+  | ReceivedQueryResults (Result Http.Error String)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -50,6 +54,20 @@ update msg model =
       ({ model | passwordAgain = password }
       , Cmd.none)
 
+    LoadButtonPressed columnId ->
+      ({ model | queryResult = "helloresult" ++ columnId }
+      , Http.get
+      { url = "https://postman-echo.com/get?foo1=bar1&foo2=bar2"
+      , expect = Http.expectString ReceivedQueryResults
+      })
+
+    ReceivedQueryResults result ->
+      case result of
+        Ok fullText ->
+          ({ model | queryResult = "helloresult" ++ fullText }, Cmd.none)
+
+        Err _ ->
+          ({ model | queryResult = "fail" }, Cmd.none)
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -62,14 +80,14 @@ view model =
     [
       Grid.container []
         [ CDN.stylesheet
-          ,Grid.row [] (List.repeat 5 (Grid.col [] [queryColumn]))
+          ,Grid.row [] <| List.repeat 5 (Grid.col [] [queryColumn model])
         ]
     , validator model
     ]
 
 
-queryColumn: Html Msg
-queryColumn =
+queryColumn: Model -> Html Msg
+queryColumn model =
     Grid.container []
         [
          Grid.row []
@@ -90,11 +108,11 @@ queryColumn =
                   ,deleteColumnButton "1234567890"
                  ]
             ]
-        , Grid.row [] [Grid.col [] [ queryResults ]]
+        , Grid.row [] [Grid.col [] [ queryResults model ]]
             ]
 
-queryResults : Html Msg
-queryResults = text "query results"
+queryResults : Model -> Html Msg
+queryResults model = text <| "query results" ++ model.queryResult
 
 categorySelector : Html Msg
 categorySelector =  select []
@@ -115,7 +133,7 @@ loadRefreshButton param =
            [ Button.primary
            , Button.small
            , Button.block
-           , Button.onClick (Password param)
+           , Button.onClick (LoadButtonPressed param)
            ]
     [ text "Load Results and Save URL" ]
 
