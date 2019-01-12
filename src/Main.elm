@@ -18,23 +18,22 @@ main =
 
 -- MODEL
 type alias Model =
-  { name : String
-  , password : String
-  , passwordAgain : String
-  }
+    { name : String
+    , password : String
+    , passwordAgain : String
+    }
 
 init : () -> ( Model, Cmd Msg)
 init _ =
-  (Model "" "" ""
-  , Cmd.none
-  )
+    (Model "" "" ""
+    , Cmd.none
+    )
 
 -- UPDATE
 type Msg
   = Name String
   | Password String
   | PasswordAgain String
-  | Fucker
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -50,11 +49,6 @@ update msg model =
     PasswordAgain password ->
       ({ model | passwordAgain = password }
       , Cmd.none)
-
-    Fucker ->
-      ({ model | passwordAgain = "FUCK" }
-      , Cmd.none)
-
 
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
@@ -114,8 +108,40 @@ citySelector = select [] [
                 ,option [] [text "Birminham"]
                ]
 
-helloHtml : String -> Html msg
-helloHtml str = text (str)
+
+loadRefreshButton : String -> Html Msg
+loadRefreshButton param =
+    Button.button
+           [ Button.primary
+           , Button.small
+           , Button.block
+           , Button.onClick (Password param)
+           ]
+    [ text "Load Results and Save URL" ]
+
+
+deleteColumnButton : String -> Html Msg
+deleteColumnButton param =
+    Button.button
+        [ Button.danger
+        , Button.small
+        , Button.block
+        , Button.onClick (PasswordAgain param)
+        ]
+    [text "Delete this column"]
+
+
+ ---------------------------------------------------
+
+ ---------------------------------------------------
+validator model =
+    div [] [
+         viewInput "text" "Name" model.name Name
+        , viewInput "password" "Password" model.password Password
+        , viewInput "password" "Re-enter Password"
+             model.passwordAgain PasswordAgain
+        , viewValidation model
+        ]
 
 viewInput : String -> String -> String -> (String -> msg) -> Html msg
 viewInput t p v toMsg =
@@ -129,29 +155,3 @@ viewValidation model =
   else
     div [ style "color" "red" ] [ text "Passwords do not match!" ]
 
-
-loadRefreshButton : String -> Html Msg
-loadRefreshButton param = Button.button
-           [ Button.primary
-           , Button.small
-           , Button.block
-           , Button.onClick (Password param)
-           ]
-           [ text "Load Results and Save URL" ]
-
-
-deleteColumnButton param =
-    Button.button
-        [ Button.danger
-        , Button.small
-        , Button.block
-        , Button.onClick (PasswordAgain param)
-        ] [text "Delete this column"]
-
-validator model =
-    div [] [
-         viewInput "text" "Name" model.name Name
-        , viewInput "password" "Password" model.password Password
-        , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
-        , viewValidation model
-        ]
