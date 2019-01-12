@@ -68,19 +68,9 @@ view model =
     [
       Grid.container []
         [ CDN.stylesheet
-          ,Grid.row [] [
-                Grid.col [] [ queryColumn ]
-               ,Grid.col [] [ queryColumn ]
-               ,Grid.col [] [ queryColumn ]
-               ,Grid.col [] [ queryColumn ]
-              ]
+          ,Grid.row [] (List.repeat 5 (Grid.col [] [queryColumn]))
         ]
-    , viewInput "text" "Name" model.name Name
-    , helloHtml ("yo")
-    , text "hello2"
-    , viewInput "password" "Password" model.password Password
-    , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
-    , viewValidation model
+    , validator model
     ]
 
 
@@ -157,3 +147,11 @@ deleteColumnButton param =
         , Button.block
         , Button.onClick (PasswordAgain param)
         ] [text "Delete this column"]
+
+validator model =
+    div [] [
+         viewInput "text" "Name" model.name Name
+        , viewInput "password" "Password" model.password Password
+        , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
+        , viewValidation model
+        ]
