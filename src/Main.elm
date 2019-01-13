@@ -11,6 +11,7 @@ import Bootstrap.Button as Button
 import Bootstrap.Utilities.Spacing as Spacing
 import Http
 import Json.Encode
+import Json.Decode exposing (Decoder,string,field)
 
 -- MAIN
 main =
@@ -67,7 +68,7 @@ update msg model =
                   ,( "setIndex", Json.Encode.int 0)
                   ]
       , url = "http://localhost:8080/api/"
-      , expect = Http.expectString ReceivedQueryResults
+      , expect = Http.expectJson ReceivedQueryResults queryDecoder
       , headers = []
       , timeout = Nothing
       , tracker = Nothing
@@ -76,10 +77,19 @@ update msg model =
     ReceivedQueryResults result ->
       case result of
         Ok fullText ->
-          ({ model | queryResult = "helloresult" ++ fullText }, Cmd.none)
+          ({ model | queryResult = fullText }, Cmd.none)
 
-        Err _ ->
-          ({ model | queryResult = "fail" }, Cmd.none)
+        Err e ->
+            case e of
+                Http.BadBody s ->
+                    ({ model | queryResult = "fail"++s }, Cmd.none)
+
+                Http.BadUrl _     ->  (model,Cmd.none)
+                Http.Timeout      ->  (model,Cmd.none)
+                Http.NetworkError ->  (model,Cmd.none)
+                Http.BadStatus _  ->  (model,Cmd.none)
+
+
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -124,7 +134,7 @@ queryColumn model =
             ]
 
 queryResults : Model -> Html Msg
-queryResults model = text <| "query results" ++ model.queryResult
+queryResults model = postBody model.queryResult
 
 categorySelector : Html Msg
 categorySelector =  select []
@@ -160,6 +170,22 @@ deleteColumnButton param =
         ]
     [text "Delete this column"]
 
+
+-- This rendered-html node is a custom element
+-- defined in the html in a <script> tag
+-- https://leveljournal.com/server-rendered-html-in-elm
+
+postBody : String -> Html msg
+postBody html =
+    Html.node "rendered-html"
+        [ property "content" (Json.Encode.string html) ]
+        []
+
+
+-- HTTP
+queryDecoder : Decoder String
+queryDecoder =
+  field "response" Json.Decode.string
 
  ---------------------------------------------------
 
