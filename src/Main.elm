@@ -22,12 +22,13 @@ main =
 -- MODEL
 type alias Model =
     {
-     queryResult : String
+     queryResult : String,
+     urlResultTuples : (List (String,String))
     }
 
 init : () -> ( Model, Cmd Msg)
 init _ =
-    (Model "" 
+    (Model "" [("url1","result1"),("url2","result2")]
     , Cmd.none
     )
 
@@ -48,7 +49,7 @@ update msg model =
         method = "POST"
       , body = Http.jsonBody <|
               Json.Encode.object [
-                   ( "searchURL", Json.Encode.string "mytitle")
+                   ( "searchURL", Json.Encode.string columnId)
                   ,( "columnIndex", Json.Encode.int 0)
                   ,( "setIndex", Json.Encode.int 0)
                   ]
@@ -86,14 +87,16 @@ view model =
   div []
     [
       Grid.container []
-        [ CDN.stylesheet
-          ,Grid.row [] <| List.repeat 5 (Grid.col [] [queryColumn model])
+        [   CDN.stylesheet
+          , Grid.row [] <| List.map queryGridColumnWrap model.urlResultTuples
         ]
     ]
 
 
-queryColumn: Model -> Html Msg
-queryColumn model =
+queryGridColumnWrap tuple = Grid.col [] [queryColumn tuple]
+
+queryColumn: (String,String) -> Html Msg
+queryColumn urlResultTuple =
     Grid.container []
         [
          Grid.row []
@@ -110,15 +113,18 @@ queryColumn model =
             [
              Grid.col []
                  [
-                   loadRefreshButton "1234567890"
-                  ,deleteColumnButton "1234567890"
+                   loadRefreshButton  <| Tuple.first(urlResultTuple)
+                  ,deleteColumnButton <| Tuple.first(urlResultTuple)
                  ]
             ]
-        , Grid.row [] [Grid.col [] [ queryResults model ]]
+        , Grid.row [] [ Grid.col [] [ 
+            queryResults <| Tuple.second(urlResultTuple)
             ]
+            ]
+        ]
 
-queryResults : Model -> Html Msg
-queryResults model = postBody model.queryResult
+queryResults : String -> Html Msg
+queryResults result = postBody result
 
 categorySelector : Html Msg
 categorySelector =  select []
