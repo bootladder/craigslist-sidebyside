@@ -28,7 +28,8 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg)
 init _ =
-    (Model "" [("url1","result1"),("url2","result2")]
+    -- The initial model comes from a Request, now it is hard coded
+    (Model "" [("hardUrl1","result1"),("hardUrl2","result2")]
     , Cmd.none
     )
 
@@ -36,7 +37,7 @@ init _ =
 type Msg
   =
     LoadButtonPressed String
-  | ReceivedQueryResults (Result Http.Error String)
+  | ReceivedQueryResults (Result Http.Error String) String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -54,16 +55,18 @@ update msg model =
                   ,( "setIndex", Json.Encode.int 0)
                   ]
       , url = "http://localhost:8080/api/"
-      , expect = Http.expectJson ReceivedQueryResults queryDecoder
+      , expect = Http.expectJson (\result -> ReceivedQueryResults result columnId) queryDecoder
       , headers = []
       , timeout = Nothing
       , tracker = Nothing
       })
 
-    ReceivedQueryResults result ->
+    ReceivedQueryResults result columnId ->
       case result of
         Ok fullText ->
-          ({ model | queryResult = fullText }, Cmd.none)
+          ({ model | urlResultTuples = 
+                updateTuples model.urlResultTuples columnId fullText
+          }, Cmd.none)
 
         Err e ->
             case e of
@@ -74,6 +77,16 @@ update msg model =
                 Http.Timeout      ->  (model,Cmd.none)
                 Http.NetworkError ->  (model,Cmd.none)
                 Http.BadStatus _  ->  (model,Cmd.none)
+
+
+updateTuples : List (String,String) -> String -> String -> List (String,String)
+updateTuples origTuples columnId fullText = 
+    let f tuple = 
+            if Tuple.first(tuple) == columnId
+            then (columnId, fullText)
+            else tuple
+    in 
+    List.map f origTuples
 
 
 -- SUBSCRIPTIONS
