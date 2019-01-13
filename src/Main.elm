@@ -3,48 +3,54 @@ module Main exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput,onClick)
+import Html.Events exposing (onClick,onInput)
 import Json.Encode exposing (..)
 import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
 import Bootstrap.Button as Button
-import Bootstrap.Utilities.Spacing as Spacing
+import Bootstrap.Form.Input as Input
 import Http
 import Json.Encode
 import Json.Decode exposing (Decoder,string,field)
 
 -- MAIN
+
 main =
   Browser.element { init = init, update = update,
                         subscriptions = subscriptions,
                         view = view }
 
 -- MODEL
-type alias Model =
-    {
-     queryResult : String,
-     urlResultTuples : (List (String,String))
+
+type alias Model = { 
+    urlResultTuples : (List (String,String)) ,
+    debugBreadcrumb : String
     }
 
 init : () -> ( Model, Cmd Msg)
 init _ =
     -- The initial model comes from a Request, now it is hard coded
-    (Model "" [("hardUrl1","result1"),("hardUrl2","result2")]
+    (Model [("hardUrl1","result1"),("hardUrl2","result2")] "dummy debug"
     , Cmd.none
     )
 
 -- UPDATE
+
 type Msg
-  =
-    LoadButtonPressed String
+  = SearchQueryInput String String
+  | LoadButtonPressed String
   | ReceivedQueryResults (Result Http.Error String) String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
 
+    SearchQueryInput columnId input ->
+        ( { model | debugBreadcrumb = input }
+        , Cmd.none)
+
     LoadButtonPressed columnId ->
-      ({ model | queryResult = "helloresult" ++ columnId }
+      (model
       , Http.request
       {
         method = "POST"
@@ -71,7 +77,9 @@ update msg model =
         Err e ->
             case e of
                 Http.BadBody s ->
-                    ({ model | queryResult = "fail"++s }, Cmd.none)
+                    ({ model | urlResultTuples = 
+                        updateTuples model.urlResultTuples columnId <| "fail"++s
+                     }, Cmd.none)
 
                 Http.BadUrl _     ->  (model,Cmd.none)
                 Http.Timeout      ->  (model,Cmd.none)
@@ -101,6 +109,7 @@ view model =
     [
       Grid.container []
         [   CDN.stylesheet
+           , text model.debugBreadcrumb
           , Grid.row [] <| List.map queryGridColumnWrap model.urlResultTuples
         ]
     ]
@@ -114,11 +123,11 @@ queryColumn urlResultTuple =
         [
          Grid.row []
             [ Grid.col []
-                [ input [ placeholder "URL" ] [] ]
+                [ Input.text [ Input.attrs [ placeholder "URL" ] ] ] 
             ]
         , Grid.row []
             [ Grid.col []
-                [ input [ placeholder "Search Query"] [] ]
+                [ Input.text [ Input.attrs [ placeholder "Search Query", onInput (SearchQueryInput <| Tuple.first(urlResultTuple)) ] ] ]
             ]
         , Grid.row [] [ Grid.col [] [ categorySelector ] ]
         , Grid.row [] [ Grid.col [] [ citySelector ] ]
