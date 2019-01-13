@@ -10,6 +10,7 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Button as Button
 import Bootstrap.Utilities.Spacing as Spacing
 import Http
+import Json.Encode
 
 -- MAIN
 main =
@@ -56,9 +57,20 @@ update msg model =
 
     LoadButtonPressed columnId ->
       ({ model | queryResult = "helloresult" ++ columnId }
-      , Http.get
-      { url = "https://postman-echo.com/get?foo1=bar1&foo2=bar2"
+      , Http.request
+      {
+        method = "POST"
+      , body = Http.jsonBody <|
+              Json.Encode.object [
+                   ( "searchURL", Json.Encode.string "mytitle")
+                  ,( "columnIndex", Json.Encode.int 0)
+                  ,( "setIndex", Json.Encode.int 0)
+                  ]
+      , url = "http://localhost:8080/api/"
       , expect = Http.expectString ReceivedQueryResults
+      , headers = []
+      , timeout = Nothing
+      , tracker = Nothing
       })
 
     ReceivedQueryResults result ->
