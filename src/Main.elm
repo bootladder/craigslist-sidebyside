@@ -59,6 +59,9 @@ type alias Model =
     }
 
 
+-- INIT
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
     -- The initial model comes from a Request, now it is hard coded
@@ -181,8 +184,10 @@ update msg model =
 
         ReceivedUrlSet result ->
             case result of
-                Ok fullText ->
-                    ( {model | debugBreadcrumb = String.concat fullText}
+                Ok urlSet ->
+                    ( {model | debugBreadcrumb = String.concat urlSet,
+                                columnInfos = updateColumnInfosNewUrlSet urlSet
+                    }
                     , Cmd.none
                     )
 
@@ -265,6 +270,20 @@ updateColumnInfosFormUrl origColumnInfos columnId urlArg =
                 columnInfo
     in
     List.map f origColumnInfos
+
+updateColumnInfosNewUrlSet : List String -> List ColumnInfo
+updateColumnInfosNewUrlSet urls =
+    let
+        f index str = 
+                { id = index
+                , url = str
+                , responseHtml = ""
+                , formQuery = ""
+                , formCategory = ""
+                , formCity = ""
+                }
+    in
+        List.indexedMap f urls
 
 
 modelGetUrlFromId : Model -> Int -> String
