@@ -1,18 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
-  "bytes"
-  "golang.org/x/net/html"
-  "strings"
+	"strings"
+
+	"golang.org/x/net/html"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/browser"
@@ -72,14 +73,14 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var req craigslistPostRequest = parsePostRequestBody(r.Body)
 
 	var resp craigslistPostResponse
-  resp.ResponseHTML = fetchCraigslistQuery(req.SearchURL)
+	resp.ResponseHTML = fetchCraigslistQuery(req.SearchURL)
 	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
 	resp.Urls = urlstore.urlsets[req.SetIndex]
 
-  writePostResponse(w, resp)
+	writePostResponse(w, resp)
 }
 
-func parsePostRequestBody(requestBody io.Reader) craigslistPostRequest{
+func parsePostRequestBody(requestBody io.Reader) craigslistPostRequest {
 	var req craigslistPostRequest
 	err := json.NewDecoder(requestBody).Decode(&req)
 	fatal(err)
@@ -87,7 +88,7 @@ func parsePostRequestBody(requestBody io.Reader) craigslistPostRequest{
 	req.SearchURL, err = url.QueryUnescape(req.SearchURL)
 	fatal(err)
 
-  return req
+	return req
 }
 
 func fetchCraigslistQuery(url string) (html string) {
@@ -99,49 +100,49 @@ func fetchCraigslistQuery(url string) (html string) {
 
 	} else {
 		rawHtml := makeRequest(url)
-    html = extractCraigslistResultRows(rawHtml)
+		html = extractCraigslistResultRows(rawHtml)
 	}
-  return
+	return
 }
 
 func extractCraigslistResultRows(rawHtml string) string {
 
-  doc, _ := html.Parse(strings.NewReader(rawHtml))
-  resultRows, _ := getResultRows(doc)
-  return renderNode(resultRows)
+	doc, _ := html.Parse(strings.NewReader(rawHtml))
+	resultRows, _ := getResultRows(doc)
+	return renderNode(resultRows)
 }
 
 func getResultRows(doc *html.Node) (*html.Node, error) {
-    var b *html.Node
-    var f func(*html.Node)
-    f = func(n *html.Node) {
-        if n.Type == html.ElementNode && n.Data == "li" {
-            for _,attr  := range n.Attr {
-              if attr.Key == "class" && attr.Val == "result-row" {
-                b = n.Parent
-              }
-            }
-        }
-        for c := n.FirstChild; c != nil; c = c.NextSibling {
-            f(c)
-        }
-    }
-    f(doc)
-    if b != nil {
-        return b, nil
-    }
-    return nil, errors.New("Missing <result rows> in the node tree")
+	var b *html.Node
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "li" {
+			for _, attr := range n.Attr {
+				if attr.Key == "class" && attr.Val == "result-row" {
+					b = n.Parent
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(doc)
+	if b != nil {
+		return b, nil
+	}
+	return nil, errors.New("Missing <result rows> in the node tree")
 }
 
 func renderNode(n *html.Node) string {
-    var buf bytes.Buffer
-    w := io.Writer(&buf)
-    html.Render(w, n)
-    return buf.String()
+	var buf bytes.Buffer
+	w := io.Writer(&buf)
+	html.Render(w, n)
+	return buf.String()
 }
 
 func writePostResponse(w http.ResponseWriter,
-                       resp craigslistPostResponse) {
+	resp craigslistPostResponse) {
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
 
@@ -149,9 +150,6 @@ func writePostResponse(w http.ResponseWriter,
 	w.WriteHeader(http.StatusCreated)
 	w.Write(jsonOut)
 }
-
-
-
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
