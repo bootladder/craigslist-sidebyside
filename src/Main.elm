@@ -3,14 +3,14 @@ module Main exposing (ColumnInfo, CraigslistHTML, Model, Msg(..), Url, categoryS
 import Bootstrap.Button as Button
 import Bootstrap.CDN as CDN
 import Bootstrap.Form.Input as Input
-import Bootstrap.Grid as Grid
 import Bootstrap.Form.Select as Select
+import Bootstrap.Grid as Grid
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode exposing (Decoder, field, string)
+import Json.Decode exposing (Decoder, field, string,list)
 import Json.Encode exposing (..)
 
 
@@ -31,9 +31,16 @@ main =
 -- MODEL
 
 
-type alias ColumnId = Int
-type alias Url = String
-type alias CraigslistHTML = String
+type alias ColumnId =
+    Int
+
+
+type alias Url =
+    String
+
+
+type alias CraigslistHTML =
+    String
 
 
 type alias ColumnInfo =
@@ -56,11 +63,19 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     -- The initial model comes from a Request, now it is hard coded
     ( Model
-        [ { id = 1, url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
-        , { id = 2, url = "hardUrl2", responseHtml = "result2", formQuery = "", formCategory = "", formCity = "" }
+        [ { id = 0, url = "hardUrl0", responseHtml = "result0", formQuery = "", formCategory = "", formCity = "" }
+        , { id = 1, url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
         ]
         "dummy debug"
-    , Cmd.none
+    , Http.request
+        { method = "GET"
+        , url = "http://localhost:8080/api/0"
+        , body = Http.emptyBody
+        , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+        , headers = []
+        , timeout = Nothing
+        , tracker = Nothing
+        }
     )
 
 
@@ -75,6 +90,7 @@ type Msg
     | CityInput ColumnId String
     | LoadButtonPressed ColumnId
     | ReceivedQueryResults (Result Http.Error String) ColumnId
+    | ReceivedUrlSet (Result Http.Error (List String))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -163,6 +179,17 @@ update msg model =
                         Http.BadStatus _ ->
                             ( model, Cmd.none )
 
+        ReceivedUrlSet result ->
+            case result of
+                Ok fullText ->
+                    ( {model | debugBreadcrumb = String.concat fullText}
+                    , Cmd.none
+                    )
+
+                Err e ->
+                    ( {model | debugBreadcrumb = "watfail"}
+                    , Cmd.none )
+
 
 updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosHtml origColumnInfos columnId html =
@@ -201,6 +228,7 @@ updateColumnInfosFormQuery origColumnInfos columnId query =
     in
     List.map f origColumnInfos
 
+
 updateColumnInfosFormCategory : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormCategory origColumnInfos columnId category =
     let
@@ -218,7 +246,6 @@ updateColumnInfosFormCategory origColumnInfos columnId category =
                 columnInfo
     in
     List.map f origColumnInfos
-
 
 
 updateColumnInfosFormUrl : List ColumnInfo -> Int -> String -> List ColumnInfo
@@ -241,12 +268,18 @@ updateColumnInfosFormUrl origColumnInfos columnId urlArg =
 
 
 modelGetUrlFromId : Model -> Int -> String
-modelGetUrlFromId model columnId = 
-    let l = List.filter (\c -> c.id == columnId) model.columnInfos
+modelGetUrlFromId model columnId =
+    let
+        l =
+            List.filter (\c -> c.id == columnId) model.columnInfos
     in
-        case (List.head l) of
-            Just c -> c.url
-            Nothing -> "http://google.com"
+    case List.head l of
+        Just c ->
+            c.url
+
+        Nothing ->
+            "http://google.com"
+
 
 
 -- SUBSCRIPTIONS
@@ -366,3 +399,13 @@ postBody html =
 queryDecoder : Decoder String
 queryDecoder =
     field "response" Json.Decode.string
+
+
+
+getUrlSetDecoder : Decoder (List String)
+getUrlSetDecoder =
+    field "urls" listStringDecoder
+
+listStringDecoder : Decoder (List String)
+listStringDecoder =
+    Json.Decode.list Json.Decode.string
