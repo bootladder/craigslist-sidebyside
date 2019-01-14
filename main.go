@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -15,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var debug = false
+var debug = true
 
 var err error
 
@@ -65,31 +66,42 @@ func main() {
 
 func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Printf("Herp derp\n")
-
-	var req craigslistPostRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	fatal(err)
-	req.SearchURL, err = url.QueryUnescape(req.SearchURL)
-	fatal(err)
-	fmt.Printf("POST URL: SetIndex: %d , ColumnIndex: %d\n", req.SetIndex, req.ColumnIndex)
+	var req craigslistPostRequest = parsePostRequestBody(r.Body)
 
 	var resp craigslistPostResponse
+  resp.ResponseHTML = fetchCraigslistQuery(req.SearchURL)
+	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
+	resp.Urls = urlstore.urlsets[req.SetIndex]
 
+  writePostResponse(w, resp)
+}
+
+func parsePostRequestBody(requestBody io.Reader) craigslistPostRequest{
+	var req craigslistPostRequest
+	err := json.NewDecoder(requestBody).Decode(&req)
+	fatal(err)
+
+	req.SearchURL, err = url.QueryUnescape(req.SearchURL)
+	fatal(err)
+
+  return req
+}
+
+func fetchCraigslistQuery(url string) (html string) {
 	if debug == true {
-		resp.ResponseHTML =
+		html =
 			`<html><body><ul><li class="result-row" data-pid="6744258112">` +
-				` Wow cool ` + req.SearchURL +
+				` Wow cool ` + url +
 				` </li></ul></body></html>`
 
 	} else {
-		resp.ResponseHTML = makeRequest(req.SearchURL)
+		html = makeRequest(url)
 	}
+  return
+}
 
-	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
-
-	resp.Urls = urlstore.urlsets[req.SetIndex]
-
+func writePostResponse(w http.ResponseWriter,
+                       resp craigslistPostResponse) {
 	jsonOut, err := json.Marshal(resp)
 	fatal(err)
 
