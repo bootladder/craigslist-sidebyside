@@ -73,7 +73,7 @@ func Test_setUrlAt_storesUrlInArray_andCallsSave(t *testing.T) {
 
 	urlstore.urlsets = [][]string{{"orig1", "orig2"}, {"orig1", "orig2"}}
 	expectedURLSets := [][]string{{"orig1", "orig2"}, {"orig1", "newurl"}}
-	jsonBytes, _ := json.Marshal(expectedURLSets)
+	jsonBytes, _ := json.MarshalIndent(expectedURLSets, "", "  ")
 
 	urlstore.setURLAt(1, 1, "newurl")
 
@@ -87,7 +87,7 @@ func Test_deleteUrlAt_removesFromArray_andCallsSave(t *testing.T) {
 
 	urlstore.urlsets = [][]string{{"orig1", "orig2"}, {"orig1", "orig2"}}
 	expectedURLSets := [][]string{{"orig2"}, {"orig1", "orig2"}}
-	jsonBytes, _ := json.Marshal(expectedURLSets)
+	jsonBytes, _ := json.MarshalIndent(expectedURLSets, "", "  ")
 
 	urlstore.deleteURLAt(0, 0)
 
@@ -100,9 +100,9 @@ func Test_addURL_addsToArray_andCallsSave(t *testing.T) {
 	var urlstore urlStore
 
 	urlstore.urlsets = [][]string{{"orig1"}, {"orig1", "orig2"}}
-	expectedURLSets := [][]string{{"orig1", "http://boston.craigslist.org/jjj/?query=hello"}, {"orig1", "orig2"}}
+	expectedURLSets := [][]string{{"orig1", "http://boston.craigslist.org/search/jjj/?sort=date&query=engineer"}, {"orig1", "orig2"}}
 
-	jsonBytes, _ := json.Marshal(expectedURLSets)
+	jsonBytes, _ := json.MarshalIndent(expectedURLSets, "", "  ")
 
 	urlstore.addURL(0)
 

@@ -20,7 +20,7 @@ func (s *urlStore) loadURLs() error {
 	}
 
 	err = json.Unmarshal(bytes, &s.urlsets)
-	fmt.Printf("parseURLsFile: %v", s.urlsets)
+	fmt.Printf("parseURLsFile: %v\n", s.urlsets)
 	return err
 }
 
