@@ -1,9 +1,10 @@
-module Main exposing (ColumnInfo, CraigslistHTML, Model, Msg(..), Url, categorySelector, citySelector, deleteColumnButton, init, loadRefreshButton, main, postBody, queryColumn, queryDecoder, queryGridColumnWrap, queryResults, subscriptions, update , view)
+module Main exposing (ColumnInfo, CraigslistHTML, Model, Msg(..), Url, categorySelector, citySelector, deleteColumnButton, init, loadRefreshButton, main, postBody, queryColumn, queryDecoder, queryGridColumnWrap, queryResults, subscriptions, update, view)
 
 import Bootstrap.Button as Button
 import Bootstrap.CDN as CDN
 import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
+import Bootstrap.Form.Select as Select
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -42,6 +43,9 @@ type alias ColumnInfo =
     { id : String
     , url : String
     , responseHtml : String
+    , formQuery : String
+    , formCategory : String
+    , formCity : String
     }
 
 
@@ -54,7 +58,11 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     -- The initial model comes from a Request, now it is hard coded
-    ( Model [ { id = "1", url = "hardUrl1", responseHtml = "result1" }, { id = "2", url = "hardUrl2", responseHtml = "result2" } ] "dummy debug"
+    ( Model
+        [ { id = "1", url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
+        , { id = "2", url = "hardUrl2", responseHtml = "result2", formQuery = "", formCategory = "", formCity = "" }
+        ]
+        "dummy debug"
     , Cmd.none
     )
 
@@ -64,7 +72,10 @@ init _ =
 
 
 type Msg
-    = SearchQueryInput String String
+    = UrlInput String String
+    | SearchQueryInput String String
+    | CategoryInput String String
+    | CityInput String String
     | LoadButtonPressed String
     | ReceivedQueryResults (Result Http.Error String) String
 
@@ -72,8 +83,35 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        UrlInput columnId input ->
+            ( { model
+                | debugBreadcrumb = input
+                , columnInfos = updateColumnInfosFormUrl model.columnInfos columnId input
+              }
+            , Cmd.none
+            )
+
         SearchQueryInput columnId input ->
-            ( { model | debugBreadcrumb = input }
+            ( { model
+                | debugBreadcrumb = input
+                , columnInfos = updateColumnInfosFormQuery model.columnInfos columnId input
+              }
+            , Cmd.none
+            )
+
+        CategoryInput columnId input ->
+            ( { model
+                | debugBreadcrumb = input
+                , columnInfos = updateColumnInfosFormCategory model.columnInfos columnId input
+              }
+            , Cmd.none
+            )
+
+        CityInput columnId input ->
+            ( { model
+                | debugBreadcrumb = input
+                , columnInfos = updateColumnInfosFormQuery model.columnInfos columnId input
+              }
             , Cmd.none
             )
 
@@ -84,7 +122,7 @@ update msg model =
                 , body =
                     Http.jsonBody <|
                         Json.Encode.object
-                            [ ( "searchURL", Json.Encode.string columnId )
+                            [ ( "searchURL", Json.Encode.string <| modelGetUrlFromId model columnId )
                             , ( "columnIndex", Json.Encode.int 0 )
                             , ( "setIndex", Json.Encode.int 0 )
                             ]
@@ -129,15 +167,17 @@ update msg model =
                             ( model, Cmd.none )
 
 
-updateColumnInfosHtml : List ( ColumnInfo ) -> String -> String -> List ( ColumnInfo )
+updateColumnInfosHtml : List ColumnInfo -> String -> String -> List ColumnInfo
 updateColumnInfosHtml origColumnInfos columnId html =
     let
         f columnInfo =
             if columnInfo.id == columnId then
-                {
-                    id =  columnInfo.id,
-                    url = columnInfo.url,
-                    responseHtml = html
+                { id = columnInfo.id
+                , url = columnInfo.url
+                , responseHtml = html
+                , formQuery = columnInfo.formQuery
+                , formCategory = columnInfo.formCategory
+                , formCity = columnInfo.formCity
                 }
 
             else
@@ -145,6 +185,71 @@ updateColumnInfosHtml origColumnInfos columnId html =
     in
     List.map f origColumnInfos
 
+
+updateColumnInfosFormQuery : List ColumnInfo -> String -> String -> List ColumnInfo
+updateColumnInfosFormQuery origColumnInfos columnId query =
+    let
+        f columnInfo =
+            if columnInfo.id == columnId then
+                { id = columnInfo.id
+                , url = query
+                , responseHtml = columnInfo.responseHtml
+                , formQuery = query
+                , formCategory = columnInfo.formCategory
+                , formCity = columnInfo.formCity
+                }
+
+            else
+                columnInfo
+    in
+    List.map f origColumnInfos
+
+updateColumnInfosFormCategory : List ColumnInfo -> String -> String -> List ColumnInfo
+updateColumnInfosFormCategory origColumnInfos columnId category =
+    let
+        f columnInfo =
+            if columnInfo.id == columnId then
+                { id = columnInfo.id
+                , url = columnInfo.formQuery ++ category
+                , responseHtml = columnInfo.responseHtml
+                , formQuery = columnInfo.formQuery
+                , formCategory = columnInfo.formCategory
+                , formCity = columnInfo.formCity
+                }
+
+            else
+                columnInfo
+    in
+    List.map f origColumnInfos
+
+
+
+updateColumnInfosFormUrl : List ColumnInfo -> String -> String -> List ColumnInfo
+updateColumnInfosFormUrl origColumnInfos columnId urlArg =
+    let
+        f columnInfo =
+            if columnInfo.id == columnId then
+                { id = columnInfo.id
+                , url = urlArg
+                , responseHtml = columnInfo.responseHtml
+                , formQuery = columnInfo.formQuery
+                , formCategory = columnInfo.formCategory
+                , formCity = columnInfo.formCity
+                }
+
+            else
+                columnInfo
+    in
+    List.map f origColumnInfos
+
+
+modelGetUrlFromId : Model -> String -> String
+modelGetUrlFromId model columnId = 
+    let l = List.filter (\c -> c.id == columnId) model.columnInfos
+    in
+        case (List.head l) of
+            Just c -> c.url
+            Nothing -> "http://google.com"
 
 
 -- SUBSCRIPTIONS
@@ -179,13 +284,13 @@ queryColumn columnInfo =
     Grid.container []
         [ Grid.row []
             [ Grid.col []
-                [ Input.text [ Input.attrs [ placeholder "URL" ] ] ]
+                [ Input.text [ Input.attrs [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] ] ]
             ]
         , Grid.row []
             [ Grid.col []
-                [ Input.text [ Input.attrs [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id ) ] ] ]
+                [ Input.text [ Input.attrs [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] ] ]
             ]
-        , Grid.row [] [ Grid.col [] [ categorySelector ] ]
+        , Grid.row [] [ Grid.col [] [ categorySelector columnInfo.id ] ]
         , Grid.row [] [ Grid.col [] [ citySelector ] ]
         , Grid.row []
             [ Grid.col []
@@ -206,11 +311,11 @@ queryResults result =
     postBody result
 
 
-categorySelector : Html Msg
-categorySelector =
-    select []
-        [ option [] [ text "Select Category" ]
-        , option [] [ text "option 2" ]
+categorySelector : String -> Html Msg
+categorySelector id =
+    Select.select [ Select.attrs [ onInput (CategoryInput id) ] ]
+        [ Select.item [] [ text "Select Category" ]
+        , Select.item [] [ text "option 2" ]
         ]
 
 
