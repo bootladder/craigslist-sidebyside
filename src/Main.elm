@@ -31,16 +31,13 @@ main =
 -- MODEL
 
 
-type alias Url =
-    String
-
-
-type alias CraigslistHTML =
-    String
+type alias ColumnId = Int
+type alias Url = String
+type alias CraigslistHTML = String
 
 
 type alias ColumnInfo =
-    { id : String
+    { id : Int
     , url : String
     , responseHtml : String
     , formQuery : String
@@ -59,8 +56,8 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     -- The initial model comes from a Request, now it is hard coded
     ( Model
-        [ { id = "1", url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
-        , { id = "2", url = "hardUrl2", responseHtml = "result2", formQuery = "", formCategory = "", formCity = "" }
+        [ { id = 1, url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
+        , { id = 2, url = "hardUrl2", responseHtml = "result2", formQuery = "", formCategory = "", formCity = "" }
         ]
         "dummy debug"
     , Cmd.none
@@ -72,12 +69,12 @@ init _ =
 
 
 type Msg
-    = UrlInput String String
-    | SearchQueryInput String String
-    | CategoryInput String String
-    | CityInput String String
-    | LoadButtonPressed String
-    | ReceivedQueryResults (Result Http.Error String) String
+    = UrlInput ColumnId String
+    | SearchQueryInput ColumnId String
+    | CategoryInput ColumnId String
+    | CityInput ColumnId String
+    | LoadButtonPressed ColumnId
+    | ReceivedQueryResults (Result Http.Error String) ColumnId
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -123,7 +120,7 @@ update msg model =
                     Http.jsonBody <|
                         Json.Encode.object
                             [ ( "searchURL", Json.Encode.string <| modelGetUrlFromId model columnId )
-                            , ( "columnIndex", Json.Encode.int 0 )
+                            , ( "columnIndex", Json.Encode.int columnId )
                             , ( "setIndex", Json.Encode.int 0 )
                             ]
                 , url = "http://localhost:8080/api/"
@@ -167,7 +164,7 @@ update msg model =
                             ( model, Cmd.none )
 
 
-updateColumnInfosHtml : List ColumnInfo -> String -> String -> List ColumnInfo
+updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosHtml origColumnInfos columnId html =
     let
         f columnInfo =
@@ -186,7 +183,7 @@ updateColumnInfosHtml origColumnInfos columnId html =
     List.map f origColumnInfos
 
 
-updateColumnInfosFormQuery : List ColumnInfo -> String -> String -> List ColumnInfo
+updateColumnInfosFormQuery : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormQuery origColumnInfos columnId query =
     let
         f columnInfo =
@@ -204,7 +201,7 @@ updateColumnInfosFormQuery origColumnInfos columnId query =
     in
     List.map f origColumnInfos
 
-updateColumnInfosFormCategory : List ColumnInfo -> String -> String -> List ColumnInfo
+updateColumnInfosFormCategory : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormCategory origColumnInfos columnId category =
     let
         f columnInfo =
@@ -224,7 +221,7 @@ updateColumnInfosFormCategory origColumnInfos columnId category =
 
 
 
-updateColumnInfosFormUrl : List ColumnInfo -> String -> String -> List ColumnInfo
+updateColumnInfosFormUrl : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormUrl origColumnInfos columnId urlArg =
     let
         f columnInfo =
@@ -243,7 +240,7 @@ updateColumnInfosFormUrl origColumnInfos columnId urlArg =
     List.map f origColumnInfos
 
 
-modelGetUrlFromId : Model -> String -> String
+modelGetUrlFromId : Model -> Int -> String
 modelGetUrlFromId model columnId = 
     let l = List.filter (\c -> c.id == columnId) model.columnInfos
     in
@@ -311,7 +308,7 @@ queryResults result =
     postBody result
 
 
-categorySelector : String -> Html Msg
+categorySelector : ColumnId -> Html Msg
 categorySelector id =
     Select.select [ Select.attrs [ onInput (CategoryInput id) ] ]
         [ Select.item [] [ text "Select Category" ]
@@ -327,7 +324,7 @@ citySelector =
         ]
 
 
-loadRefreshButton : String -> Html Msg
+loadRefreshButton : ColumnId -> Html Msg
 loadRefreshButton param =
     Button.button
         [ Button.primary
@@ -338,7 +335,7 @@ loadRefreshButton param =
         [ text "Load Results and Save URL" ]
 
 
-deleteColumnButton : String -> Html Msg
+deleteColumnButton : ColumnId -> Html Msg
 deleteColumnButton param =
     Button.button
         [ Button.danger
