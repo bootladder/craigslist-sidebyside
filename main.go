@@ -10,13 +10,16 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+  "bytes"
+  "golang.org/x/net/html"
+  "strings"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 )
 
-var debug = true
+var debug = false
 
 var err error
 
@@ -95,9 +98,47 @@ func fetchCraigslistQuery(url string) (html string) {
 				` </li></ul></body></html>`
 
 	} else {
-		html = makeRequest(url)
+		rawHtml := makeRequest(url)
+    html = extractCraigslistResultRows(rawHtml)
 	}
   return
+}
+
+func extractCraigslistResultRows(rawHtml string) string {
+
+  doc, _ := html.Parse(strings.NewReader(rawHtml))
+  bn, err := getBody(doc)
+  if err != nil {
+      return ""
+  }
+  body := renderNode(bn)
+  fmt.Println(body)
+  return body
+}
+
+func getBody(doc *html.Node) (*html.Node, error) {
+    var b *html.Node
+    var f func(*html.Node)
+    f = func(n *html.Node) {
+        if n.Type == html.ElementNode && n.Data == "body" {
+            b = n
+        }
+        for c := n.FirstChild; c != nil; c = c.NextSibling {
+            f(c)
+        }
+    }
+    f(doc)
+    if b != nil {
+        return b, nil
+    }
+    return nil, errors.New("Missing <body> in the node tree")
+}
+
+func renderNode(n *html.Node) string {
+    var buf bytes.Buffer
+    w := io.Writer(&buf)
+    html.Render(w, n)
+    return buf.String()
 }
 
 func writePostResponse(w http.ResponseWriter,
@@ -109,6 +150,9 @@ func writePostResponse(w http.ResponseWriter,
 	w.WriteHeader(http.StatusCreated)
 	w.Write(jsonOut)
 }
+
+
+
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
