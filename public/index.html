@@ -31,11 +31,50 @@
 <script type="text/babel" src="CraigslistColumn.jsx"></script>
 <script type="text/babel" src="Selectors.jsx"></script>
 <script type="text/babel" src="app.jsx">make sure app is defined last</script>
+<script src="main.js"></script>
 
-<div id="app"></div>
+
+<script>
+customElements.define(
+  "rendered-html",
+  class RenderedHtml extends HTMLElement {
+    constructor() {
+      super();
+      this._content = "";
+    }
+
+    set content(value) {
+      if (this._content === value) return;
+      this._content = value;
+      this.innerHTML = value;
+    }
+
+    get content() {
+      return this._content;
+    }
+  }
+);
+</script>
+
 
 <script type="text/babel">
-  ReactDOM.render(<App />, document.getElementById('app'));
+//replacing with elm
+ //ReactDOM.render(<App />, document.getElementById('app'));
 </script>
+
+<body>
+
+    <div id="elmapp">aye elm</div>
+    <script>
+     //var node = document.getElementById("app");
+     //var app = Elm.Main.embed(node);
+     var app = Elm.Main.init({
+         node: document.getElementById('elmapp')
+     });
+    </script>
+
+
+    <div id="app"></div>
+</body>
 
 </html>

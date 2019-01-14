@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var debug = true
+var debug = false
 
 var err error
 
@@ -64,6 +64,8 @@ func main() {
 }
 
 func postNoteHandler(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Printf("Herp derp\n")
 
 	var req craigslistPostRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
