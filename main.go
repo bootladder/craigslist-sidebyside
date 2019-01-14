@@ -107,33 +107,8 @@ func fetchCraigslistQuery(url string) (html string) {
 func extractCraigslistResultRows(rawHtml string) string {
 
   doc, _ := html.Parse(strings.NewReader(rawHtml))
-  bn, err := getBody(doc)
-  if err != nil {
-      return ""
-  }
-  //body := renderNode(bn)
-
-  resultRows, err := getResultRows(bn)
-  fmt.Println(resultRows)
+  resultRows, _ := getResultRows(doc)
   return renderNode(resultRows)
-}
-
-func getBody(doc *html.Node) (*html.Node, error) {
-    var b *html.Node
-    var f func(*html.Node)
-    f = func(n *html.Node) {
-        if n.Type == html.ElementNode && n.Data == "body" {
-            b = n
-        }
-        for c := n.FirstChild; c != nil; c = c.NextSibling {
-            f(c)
-        }
-    }
-    f(doc)
-    if b != nil {
-        return b, nil
-    }
-    return nil, errors.New("Missing <body> in the node tree")
 }
 
 func getResultRows(doc *html.Node) (*html.Node, error) {
@@ -141,13 +116,8 @@ func getResultRows(doc *html.Node) (*html.Node, error) {
     var f func(*html.Node)
     f = func(n *html.Node) {
         if n.Type == html.ElementNode && n.Data == "li" {
-            //fmt.Println("yay resultRow")
-            //fmt.Println(renderNode(n))
             for _,attr  := range n.Attr {
-              //fmt.Printf("%s : %s   ",attr.Key,attr.Val)
               if attr.Key == "class" && attr.Val == "result-row" {
-                //fmt.Printf("%s : %s   ",attr.Key,attr.Val)
-                //fmt.Println(renderNode(n.Parent))
                 b = n.Parent
               }
             }
@@ -160,7 +130,7 @@ func getResultRows(doc *html.Node) (*html.Node, error) {
     if b != nil {
         return b, nil
     }
-    return nil, errors.New("Missing <body> in the node tree")
+    return nil, errors.New("Missing <result rows> in the node tree")
 }
 
 func renderNode(n *html.Node) string {
