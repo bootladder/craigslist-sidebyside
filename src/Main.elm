@@ -1,10 +1,10 @@
 module Main exposing (ColumnInfo, CraigslistHTML, Model, Msg(..), Url, categorySelector, citySelector, deleteColumnButton, init, loadRefreshButton, main, postBody, queryColumn, queryDecoder, queryGridColumnWrap, queryResults, subscriptions, update, view)
 
-import Bootstrap.Button as Button
-import Bootstrap.CDN as CDN
-import Bootstrap.Form.Input as Input
-import Bootstrap.Form.Select as Select
-import Bootstrap.Grid as Grid
+--import Bootstrap.Button as Button
+--import Bootstrap.CDN as CDN
+--import Bootstrap.Form.Input as Input
+--import Bootstrap.Form.Select as Select
+--import Bootstrap.Grid as Grid
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -320,43 +320,35 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ Grid.container []
-            [ CDN.stylesheet
-            , text model.debugBreadcrumb
-            , Grid.row [] <| List.map queryGridColumnWrap model.columnInfos
-            ]
+        [  
+             text model.debugBreadcrumb
+            , div [] <| List.map queryGridColumnWrap model.columnInfos
+            
         ]
 
 
 queryGridColumnWrap columnInfo =
-    Grid.col [] [ queryColumn columnInfo ]
+     queryColumn columnInfo 
 
 
 queryColumn : ColumnInfo -> Html Msg
 queryColumn columnInfo =
-    Grid.container []
-        [ Grid.row []
-            [ Grid.col []
-                [ Input.text [ Input.attrs [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] ] ]
-            ]
-        , Grid.row []
-            [ Grid.col []
-                [ Input.text [ Input.attrs [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] ] ]
-            ]
-        , Grid.row [] [ Grid.col [] [ categorySelector columnInfo.id ] ]
-        , Grid.row [] [ Grid.col [] [ citySelector ] ]
-        , Grid.row []
-            [ Grid.col []
-                [ loadRefreshButton columnInfo.id
+    div [] [
+      --Input.text [ Input.attrs [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] ] 
+            
+       --Input.text [ Input.attrs [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] ] 
+            
+         categorySelector columnInfo.id 
+        , citySelector
+        , loadRefreshButton columnInfo.id
                 , deleteColumnButton columnInfo.id
-                ]
-            ]
-        , Grid.row []
-            [ Grid.col []
-                [ queryResults columnInfo.responseHtml
-                ]
-            ]
-        ]
+                
+            
+        , queryResults columnInfo.responseHtml
+    ]
+                
+            
+        
 
 
 queryResults : String -> Html Msg
@@ -366,10 +358,11 @@ queryResults result =
 
 categorySelector : ColumnId -> Html Msg
 categorySelector id =
-    Select.select [ Select.attrs [ onInput (CategoryInput id) ] ]
-        [ Select.item [] [ text "Select Category" ]
-        , Select.item [] [ text "option 2" ]
-        ]
+    text "categorySelectr"
+    --Select.select [ Select.attrs [ onInput (CategoryInput id) ] ]
+    --    [ Select.item [] [ text "Select Category" ]
+    --    , Select.item [] [ text "option 2" ]
+    --    ]
 
 
 citySelector : Html Msg
@@ -382,24 +375,26 @@ citySelector =
 
 loadRefreshButton : ColumnId -> Html Msg
 loadRefreshButton param =
-    Button.button
-        [ Button.primary
-        , Button.small
-        , Button.block
-        , Button.onClick (LoadButtonPressed param)
-        ]
-        [ text "Load Results and Save URL" ]
+    text "loadRefreshButton"
+    --Button.button
+    --    [ Button.primary
+    --    , Button.small
+    --    , Button.block
+    --    , Button.onClick (LoadButtonPressed param)
+    --    ]
+    --    [ text "Load Results and Save URL" ]
 
 
 deleteColumnButton : ColumnId -> Html Msg
 deleteColumnButton param =
-    Button.button
-        [ Button.danger
-        , Button.small
-        , Button.block
-        , Button.onClick (LoadButtonPressed param)
-        ]
-        [ text "Delete this column" ]
+    text "deleteColumnbutton"
+  --  Button.button
+  --      [ Button.danger
+  --      , Button.small
+  --      , Button.block
+  --      , Button.onClick (LoadButtonPressed param)
+  --      ]
+  --      [ text "Delete this column" ]
 
 
 
