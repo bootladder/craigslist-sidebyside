@@ -10,7 +10,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode exposing (Decoder, field, string,list)
+import Json.Decode exposing (Decoder, field, list, string)
 import Json.Encode exposing (..)
 
 
@@ -57,6 +57,7 @@ type alias Model =
     { columnInfos : List ColumnInfo
     , debugBreadcrumb : String
     }
+
 
 
 -- INIT
@@ -185,15 +186,17 @@ update msg model =
         ReceivedUrlSet result ->
             case result of
                 Ok urlSet ->
-                    ( {model | debugBreadcrumb = String.concat urlSet,
-                                columnInfos = updateColumnInfosNewUrlSet urlSet
-                    }
+                    ( { model
+                        | debugBreadcrumb = String.concat urlSet
+                        , columnInfos = updateColumnInfosNewUrlSet urlSet
+                      }
                     , Cmd.none
                     )
 
                 Err e ->
-                    ( {model | debugBreadcrumb = "watfail"}
-                    , Cmd.none )
+                    ( { model | debugBreadcrumb = "watfail" }
+                    , Cmd.none
+                    )
 
 
 updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
@@ -271,19 +274,20 @@ updateColumnInfosFormUrl origColumnInfos columnId urlArg =
     in
     List.map f origColumnInfos
 
+
 updateColumnInfosNewUrlSet : List String -> List ColumnInfo
 updateColumnInfosNewUrlSet urls =
     let
-        f index str = 
-                { id = index
-                , url = str
-                , responseHtml = ""
-                , formQuery = ""
-                , formCategory = ""
-                , formCity = ""
-                }
+        f index str =
+            { id = index
+            , url = str
+            , responseHtml = ""
+            , formQuery = ""
+            , formCategory = ""
+            , formCity = ""
+            }
     in
-        List.indexedMap f urls
+    List.indexedMap f urls
 
 
 modelGetUrlFromId : Model -> Int -> String
@@ -420,10 +424,10 @@ queryDecoder =
     field "response" Json.Decode.string
 
 
-
 getUrlSetDecoder : Decoder (List String)
 getUrlSetDecoder =
     field "urls" listStringDecoder
+
 
 listStringDecoder : Decoder (List String)
 listStringDecoder =
