@@ -313,11 +313,39 @@ subscriptions model =
 
 -- VIEW
 
+view : Model -> Html Msg
+view model =
+    div []
+        [ topHeader
+        , topTable [] <| List.map queryGridColumnWrap model.columnInfos
+        ]
+
+
+topHeader : Html Msg
+topHeader =
+    styled div
+        [ displayFlex
+        , justifyContent spaceBetween
+        , Css.height (vh 5)
+        ]
+        []
+        [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ] --text model.debugBreadcrumb
+        , styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ] --text model.debugBreadcrumb
+        ]
+
+
 
 topTable : List (Attribute msg) -> List (Html msg) -> Html msg
 topTable attrs children =
+    styled div 
+    [
+        overflowX scroll
+        , Css.height (vh 95)
+    ]
+    []
+    [
     styled Html.Styled.table
-        [ margin (px 0)
+        [ 
         ]
         attrs
         [ styled Html.Styled.tr
@@ -325,16 +353,9 @@ topTable attrs children =
             []
             children
         ]
+    ]
 
-
-view : Model -> Html Msg
-view model =
-    div []
-        [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ] --text model.debugBreadcrumb
-        , topTable [] <| List.map queryGridColumnWrap model.columnInfos
-        ]
-
-
+queryGridColumnWrap : ColumnInfo -> Html Msg
 queryGridColumnWrap columnInfo =
     styled Html.Styled.td
         []
@@ -346,9 +367,10 @@ queryColumn : ColumnInfo -> Html Msg
 queryColumn columnInfo =
     styled div
         [ Css.width auto
-        , Css.height (px 800)
         , padding (px 5)
         , overflowY scroll
+        , overflowX Css.hidden
+        , Css.height (vh 90)
         ]
         []
         [ styled input [ display block, Css.width (pct 100) ] [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] []
@@ -358,8 +380,8 @@ queryColumn columnInfo =
         , styled div
             [ displayFlex, flexDirection row, padding (px 15), justifyContent spaceBetween ]
             []
-            [ styled div [ ] [] [ loadRefreshButton columnInfo.id ]
-            , styled div [ ] [] [ deleteColumnButton columnInfo.id ]
+            [ styled div [] [] [ loadRefreshButton columnInfo.id ]
+            , styled div [] [] [ deleteColumnButton columnInfo.id ]
             ]
         , styled div [ display block ] [] []
         , styled div [ display block ] [] [ queryResults columnInfo.responseHtml ]
