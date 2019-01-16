@@ -328,7 +328,7 @@ theme =
 btn : List (Attribute msg) -> List (Html msg) -> Html msg
 btn =
     styled button
-        [ margin (px 12)
+        [ margin (px 0)
         , color (rgb 250 250 250)
         , hover
             [ backgroundColor theme.primary
@@ -337,22 +337,43 @@ btn =
         ]
 
 
+topTable : List (Attribute msg) -> List (Html msg) -> Html msg
+topTable attrs children =
+    styled Html.Styled.table
+        [ margin (px 0)
+        ]
+        attrs
+        [ styled Html.Styled.tr
+            []
+            []
+            children
+        ]
+
+
 view : Model -> Html Msg
 view model =
     div []
         [ btn [] []
         , text model.debugBreadcrumb
-        , div [] <| List.map queryGridColumnWrap model.columnInfos
+        , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
 
 queryGridColumnWrap columnInfo =
-    queryColumn columnInfo
+    styled Html.Styled.td
+        [ 
+        ]
+        []
+        [ queryColumn columnInfo ]
 
 
 queryColumn : ColumnInfo -> Html Msg
 queryColumn columnInfo =
-    div []
+    styled div
+        [ Css.width auto
+        , Css.height (px 800)
+        ]
+        []
         [ input [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] []
         , input [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] []
         , categorySelector columnInfo.id
