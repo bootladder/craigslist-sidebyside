@@ -195,21 +195,11 @@ update msg model =
                             }
                     in
                     ( newmodel
-                    , Http.request
-                        { method = "POST"
-                        , body =
-                            Http.jsonBody <|
-                                Json.Encode.object
-                                    [ ( "searchURL", Json.Encode.string <| modelGetUrlFromId newmodel 0 )
-                                    , ( "columnIndex", Json.Encode.int 0 )
-                                    , ( "setIndex", Json.Encode.int newmodel.urlSetId )
-                                    ]
-                        , url = "http://localhost:8080/api/"
-                        , expect = Http.expectJson (\jsonResult -> ReceivedQueryResults jsonResult 0) queryDecoder
-                        , headers = []
-                        , timeout = Nothing
-                        , tracker = Nothing
-                        }
+                    , 
+                    
+                    let f index url = httpRequestColumn url index newmodel.urlSetId
+                    in
+                        Cmd.batch <| List.indexedMap f urlSet
                     )
 
                 Err e ->
@@ -260,6 +250,25 @@ update msg model =
                 , tracker = Nothing
                 }
             )
+
+
+httpRequestColumn : String -> Int -> Int -> Cmd Msg
+httpRequestColumn url columnId setId =
+    Http.request
+        { method = "POST"
+        , body =
+            Http.jsonBody <|
+                Json.Encode.object
+                    [ ( "searchURL", Json.Encode.string url )
+                    , ( "columnIndex", Json.Encode.int columnId )
+                    , ( "setIndex", Json.Encode.int setId )
+                    ]
+        , url = "http://localhost:8080/api/"
+        , expect = Http.expectJson (\jsonResult -> ReceivedQueryResults jsonResult columnId) queryDecoder
+        , headers = []
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
