@@ -314,29 +314,6 @@ subscriptions model =
 -- VIEW
 
 
-{-| A plain old record holding a couple of theme colors.
--}
-theme : { secondary : Color, primary : Color }
-theme =
-    { primary = hex "55af6a"
-    , secondary = rgb 250 240 230
-    }
-
-
-{-| A reusable button which has some styles pre-applied to it.
--}
-btn : List (Attribute msg) -> List (Html msg) -> Html msg
-btn =
-    styled button
-        [ margin (px 0)
-        , color (rgb 250 250 250)
-        , hover
-            [ backgroundColor theme.primary
-            , textDecoration underline
-            ]
-        ]
-
-
 topTable : List (Attribute msg) -> List (Html msg) -> Html msg
 topTable attrs children =
     styled Html.Styled.table
@@ -353,16 +330,14 @@ topTable attrs children =
 view : Model -> Html Msg
 view model =
     div []
-        [ btn [] []
-        , text model.debugBreadcrumb
+        [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ] --text model.debugBreadcrumb
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
 
 queryGridColumnWrap columnInfo =
     styled Html.Styled.td
-        [ 
-        ]
+        []
         []
         [ queryColumn columnInfo ]
 
@@ -372,15 +347,22 @@ queryColumn columnInfo =
     styled div
         [ Css.width auto
         , Css.height (px 800)
+        , padding (px 5)
+        , overflowY scroll
         ]
         []
-        [ input [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] []
-        , input [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] []
-        , categorySelector columnInfo.id
-        , citySelector
-        , loadRefreshButton columnInfo.id
-        , deleteColumnButton columnInfo.id
-        , queryResults columnInfo.responseHtml
+        [ styled input [ display block, Css.width (pct 100) ] [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] []
+        , styled input [ display block, margin (px 10), Css.width (pct 50) ] [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] []
+        , styled div [ display inline, margin (px 10) ] [] [ categorySelector columnInfo.id ]
+        , styled div [ display inline, margin (px 10) ] [] [ citySelector ]
+        , styled div
+            [ displayFlex, flexDirection row, padding (px 15), justifyContent spaceBetween ]
+            []
+            [ styled div [ ] [] [ loadRefreshButton columnInfo.id ]
+            , styled div [ ] [] [ deleteColumnButton columnInfo.id ]
+            ]
+        , styled div [ display block ] [] []
+        , styled div [ display block ] [] [ queryResults columnInfo.responseHtml ]
         ]
 
 
@@ -418,7 +400,7 @@ deleteColumnButton param =
     button
         [ onClick (LoadButtonPressed param)
         ]
-        [ text "Delete this column" ]
+        [ text "Delete Column" ]
 
 
 
