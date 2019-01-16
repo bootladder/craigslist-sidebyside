@@ -142,7 +142,7 @@ update msg model =
                         Json.Encode.object
                             [ ( "searchURL", Json.Encode.string <| modelGetUrlFromId model columnId )
                             , ( "columnIndex", Json.Encode.int columnId )
-                            , ( "setIndex", Json.Encode.int 0 )
+                            , ( "setIndex", Json.Encode.int model.urlSetId )
                             ]
                 , url = "http://localhost:8080/api/"
                 , expect = Http.expectJson (\result -> ReceivedQueryResults result columnId) queryDecoder
@@ -187,11 +187,29 @@ update msg model =
         ReceivedUrlSet result ->
             case result of
                 Ok urlSet ->
-                    ( { model
-                        | debugBreadcrumb = String.concat urlSet
-                        , columnInfos = updateColumnInfosNewUrlSet urlSet
-                      }
-                    , Cmd.none
+                    let
+                        newmodel =
+                            { model
+                                | debugBreadcrumb = String.concat urlSet
+                                , columnInfos = updateColumnInfosNewUrlSet urlSet
+                            }
+                    in
+                    ( newmodel
+                    , Http.request
+                        { method = "POST"
+                        , body =
+                            Http.jsonBody <|
+                                Json.Encode.object
+                                    [ ( "searchURL", Json.Encode.string <| modelGetUrlFromId newmodel 0 )
+                                    , ( "columnIndex", Json.Encode.int 0 )
+                                    , ( "setIndex", Json.Encode.int newmodel.urlSetId )
+                                    ]
+                        , url = "http://localhost:8080/api/"
+                        , expect = Http.expectJson (\jsonResult -> ReceivedQueryResults jsonResult 0) queryDecoder
+                        , headers = []
+                        , timeout = Nothing
+                        , tracker = Nothing
+                        }
                     )
 
                 Err e ->
@@ -366,7 +384,8 @@ view : Model -> Html Msg
 view model =
     div []
         [ topHeader model.urlSetId
-        , text model.debugBreadcrumb
+
+        --, text model.debugBreadcrumb
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
@@ -388,7 +407,7 @@ urlSetView setNumber =
     styled div
         []
         []
-        [ button [onClick DecrementUrlSetNumber ] [ text "-" ]
+        [ button [ onClick DecrementUrlSetNumber ] [ text "-" ]
         , styled input [ textAlign center ] [ placeholder "URL SET", value setNumber ] []
         , button [ onClick IncrementUrlSetNumber ] [ text "+" ]
         ]
