@@ -52,6 +52,7 @@ type alias ColumnInfo =
 
 type alias Model =
     { columnInfos : List ColumnInfo
+    , urlSetId : Int
     , debugBreadcrumb : String
     }
 
@@ -67,6 +68,7 @@ init _ =
         [ { id = 0, url = "hardUrl0", responseHtml = "result0", formQuery = "", formCategory = "", formCity = "" }
         , { id = 1, url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
         ]
+        0
         "dummy debug"
     , Http.request
         { method = "GET"
@@ -92,6 +94,8 @@ type Msg
     | LoadButtonPressed ColumnId
     | ReceivedQueryResults (Result Http.Error String) ColumnId
     | ReceivedUrlSet (Result Http.Error (List String))
+    | IncrementUrlSetNumber
+    | DecrementUrlSetNumber
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -194,6 +198,50 @@ update msg model =
                     ( { model | debugBreadcrumb = "watfail" }
                     , Cmd.none
                     )
+
+        DecrementUrlSetNumber ->
+            let
+                newUrlSetId =
+                    if model.urlSetId == 0 then
+                        0
+
+                    else
+                        model.urlSetId - 1
+            in
+            ( { model
+                | urlSetId = newUrlSetId
+                , debugBreadcrumb = "the model is " ++ String.fromInt newUrlSetId
+              }
+            , Http.request
+                { method = "GET"
+                , url = "http://localhost:8080/api/" ++ String.fromInt newUrlSetId
+                , body = Http.emptyBody
+                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+                , headers = []
+                , timeout = Nothing
+                , tracker = Nothing
+                }
+            )
+
+        IncrementUrlSetNumber ->
+            let
+                newUrlSetId =
+                    model.urlSetId + 1
+            in
+            ( { model
+                | urlSetId = newUrlSetId
+                , debugBreadcrumb = "the model is " ++ String.fromInt newUrlSetId
+              }
+            , Http.request
+                { method = "GET"
+                , url = "http://localhost:8080/api/" ++ String.fromInt newUrlSetId
+                , body = Http.emptyBody
+                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+                , headers = []
+                , timeout = Nothing
+                , tracker = Nothing
+                }
+            )
 
 
 updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
@@ -313,47 +361,56 @@ subscriptions model =
 
 -- VIEW
 
+
 view : Model -> Html Msg
 view model =
     div []
-        [ topHeader
+        [ topHeader model.urlSetId
+        , text model.debugBreadcrumb
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
 
-topHeader : Html Msg
-topHeader =
+topHeader : Int -> Html Msg
+topHeader urlSetId =
     styled div
         [ displayFlex
-        , justifyContent spaceBetween
         , Css.height (vh 5)
         ]
         []
-        [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ] --text model.debugBreadcrumb
-        , styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ] --text model.debugBreadcrumb
+        [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
+        , urlSetView <| String.fromInt urlSetId
         ]
 
+
+urlSetView : String -> Html Msg
+urlSetView setNumber =
+    styled div
+        []
+        []
+        [ button [onClick DecrementUrlSetNumber ] [ text "-" ]
+        , styled input [ textAlign center ] [ placeholder "URL SET", value setNumber ] []
+        , button [ onClick IncrementUrlSetNumber ] [ text "+" ]
+        ]
 
 
 topTable : List (Attribute msg) -> List (Html msg) -> Html msg
 topTable attrs children =
-    styled div 
-    [
-        overflowX scroll
+    styled div
+        [ overflowX scroll
         , Css.height (vh 95)
-    ]
-    []
-    [
-    styled Html.Styled.table
-        [ 
         ]
-        attrs
-        [ styled Html.Styled.tr
+        []
+        [ styled Html.Styled.table
             []
-            []
-            children
+            attrs
+            [ styled Html.Styled.tr
+                []
+                []
+                children
+            ]
         ]
-    ]
+
 
 queryGridColumnWrap : ColumnInfo -> Html Msg
 queryGridColumnWrap columnInfo =
