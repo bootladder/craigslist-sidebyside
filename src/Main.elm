@@ -1,14 +1,11 @@
 module Main exposing (ColumnInfo, CraigslistHTML, Model, Msg(..), Url, categorySelector, citySelector, deleteColumnButton, init, loadRefreshButton, main, postBody, queryColumn, queryDecoder, queryGridColumnWrap, queryResults, subscriptions, update, view)
 
---import Bootstrap.Button as Button
---import Bootstrap.CDN as CDN
---import Bootstrap.Form.Input as Input
---import Bootstrap.Form.Select as Select
---import Bootstrap.Grid as Grid
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Css exposing (..)
+import Html
+import Html.Styled exposing (..)
+import Html.Styled.Attributes exposing (..)
+import Html.Styled.Events exposing (..)
 import Http
 import Json.Decode exposing (Decoder, field, list, string)
 import Json.Encode exposing (..)
@@ -23,7 +20,7 @@ main =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view
+        , view = view >> toUnstyled
         }
 
 
@@ -317,38 +314,53 @@ subscriptions model =
 -- VIEW
 
 
+{-| A plain old record holding a couple of theme colors.
+-}
+theme : { secondary : Color, primary : Color }
+theme =
+    { primary = hex "55af6a"
+    , secondary = rgb 250 240 230
+    }
+
+
+{-| A reusable button which has some styles pre-applied to it.
+-}
+btn : List (Attribute msg) -> List (Html msg) -> Html msg
+btn =
+    styled button
+        [ margin (px 12)
+        , color (rgb 250 250 250)
+        , hover
+            [ backgroundColor theme.primary
+            , textDecoration underline
+            ]
+        ]
+
+
 view : Model -> Html Msg
 view model =
     div []
-        [  
-             text model.debugBreadcrumb
-            , div [] <| List.map queryGridColumnWrap model.columnInfos
-            
+        [ btn [] []
+        , text model.debugBreadcrumb
+        , div [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
 
 queryGridColumnWrap columnInfo =
-     queryColumn columnInfo 
+    queryColumn columnInfo
 
 
 queryColumn : ColumnInfo -> Html Msg
 queryColumn columnInfo =
-    div [] [
-      --Input.text [ Input.attrs [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] ] 
-            
-       --Input.text [ Input.attrs [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] ] 
-            
-         categorySelector columnInfo.id 
+    div []
+        [ input [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] []
+        , input [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] []
+        , categorySelector columnInfo.id
         , citySelector
         , loadRefreshButton columnInfo.id
-                , deleteColumnButton columnInfo.id
-                
-            
+        , deleteColumnButton columnInfo.id
         , queryResults columnInfo.responseHtml
-    ]
-                
-            
-        
+        ]
 
 
 queryResults : String -> Html Msg
@@ -358,11 +370,10 @@ queryResults result =
 
 categorySelector : ColumnId -> Html Msg
 categorySelector id =
-    text "categorySelectr"
-    --Select.select [ Select.attrs [ onInput (CategoryInput id) ] ]
-    --    [ Select.item [] [ text "Select Category" ]
-    --    , Select.item [] [ text "option 2" ]
-    --    ]
+    select [ onInput (CategoryInput id) ]
+        [ option [] [ text "Select Category" ]
+        , option [] [ text "option 2" ]
+        ]
 
 
 citySelector : Html Msg
@@ -375,26 +386,18 @@ citySelector =
 
 loadRefreshButton : ColumnId -> Html Msg
 loadRefreshButton param =
-    text "loadRefreshButton"
-    --Button.button
-    --    [ Button.primary
-    --    , Button.small
-    --    , Button.block
-    --    , Button.onClick (LoadButtonPressed param)
-    --    ]
-    --    [ text "Load Results and Save URL" ]
+    button
+        [ onClick (LoadButtonPressed param)
+        ]
+        [ text "Load Results and Save URL" ]
 
 
 deleteColumnButton : ColumnId -> Html Msg
 deleteColumnButton param =
-    text "deleteColumnbutton"
-  --  Button.button
-  --      [ Button.danger
-  --      , Button.small
-  --      , Button.block
-  --      , Button.onClick (LoadButtonPressed param)
-  --      ]
-  --      [ text "Delete this column" ]
+    button
+        [ onClick (LoadButtonPressed param)
+        ]
+        [ text "Delete this column" ]
 
 
 
@@ -405,8 +408,8 @@ deleteColumnButton param =
 
 postBody : String -> Html msg
 postBody html =
-    Html.node "rendered-html"
-        [ property "content" (Json.Encode.string html) ]
+    Html.Styled.node "rendered-html"
+        [ Html.Styled.Attributes.property "content" (Json.Encode.string html) ]
         []
 
 
