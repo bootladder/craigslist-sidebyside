@@ -96,6 +96,8 @@ type Msg
     | ReceivedUrlSet (Result Http.Error (List String))
     | IncrementUrlSetNumber
     | DecrementUrlSetNumber
+    | AddColumnButtonClicked 
+    | DeleteButtonPressed ColumnId
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -200,6 +202,7 @@ update msg model =
                     let f index url = httpRequestColumn url index newmodel.urlSetId
                     in
                         Cmd.batch <| List.indexedMap f urlSet
+                        --Cmd.none --To disable loading all URLs after a refresh
                     )
 
                 Err e ->
@@ -250,6 +253,37 @@ update msg model =
                 , tracker = Nothing
                 }
             )
+
+        AddColumnButtonClicked ->
+            (model, Http.request
+                { method = "PUT"
+                , url = "http://localhost:8080/api/"
+                , body = Http.jsonBody <|
+                        Json.Encode.object
+                            [ 
+                             ( "setIndex", Json.Encode.int model.urlSetId )
+                            ]
+                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+                , headers = []
+                , timeout = Nothing
+                , tracker = Nothing
+                })
+
+        DeleteButtonPressed columnId  ->
+            (model, Http.request
+                { method = "DELETE"
+                , url = "http://localhost:8080/api/"
+                , body = Http.jsonBody <|
+                        Json.Encode.object
+                            [ 
+                             ( "columnIndex", Json.Encode.int columnId )
+                             ,( "setIndex", Json.Encode.int model.urlSetId )
+                            ]
+                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+                , headers = []
+                , timeout = Nothing
+                , tracker = Nothing
+                })
 
 
 httpRequestColumn : String -> Int -> Int -> Cmd Msg
@@ -408,6 +442,7 @@ topHeader urlSetId =
         []
         [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
         , urlSetView <| String.fromInt urlSetId
+        , button [ onClick AddColumnButtonClicked ] [text "Add Column"]
         ]
 
 
@@ -505,7 +540,7 @@ loadRefreshButton param =
 deleteColumnButton : ColumnId -> Html Msg
 deleteColumnButton param =
     button
-        [ onClick (LoadButtonPressed param)
+        [ onClick (DeleteButtonPressed param)
         ]
         [ text "Delete Column" ]
 
