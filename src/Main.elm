@@ -101,8 +101,8 @@ update msg model =
     case msg of
         FormInput formInputElement columnId input ->
             let
-                updateFunc p =
-                    case p of
+                updateFunc =
+                    case formInputElement of
                         FormUrlInput ->
                             updateColumnInfosFormUrl
 
@@ -113,11 +113,13 @@ update msg model =
                             updateColumnInfosFormCategory
 
                         FormCityInput ->
+                            --not implemented
                             updateColumnInfosFormCategory
-
-                --not implemented
             in
-            ( updateColumnInfos (updateFunc formInputElement) model columnId input
+            ( { model
+                | debugBreadcrumb = input
+                , columnInfos = updateFunc model.columnInfos columnId input
+              }
             , Cmd.none
             )
 
@@ -228,13 +230,6 @@ update msg model =
             )
 
 
-updateColumnInfos f model columnId input =
-    { model
-        | debugBreadcrumb = input
-        , columnInfos = f model.columnInfos columnId input
-    }
-
-
 httpGETUrlSet : String -> Cmd Msg
 httpGETUrlSet columnId =
     Http.request
@@ -297,9 +292,7 @@ updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosHtml origColumnInfos columnId html =
     let
         z columnInfo =
-            { columnInfo
-                | responseHtml = html
-            }
+            { columnInfo | responseHtml = html }
     in
     updateColumnInfoFieldById origColumnInfos columnId z html
 
@@ -317,9 +310,7 @@ updateColumnInfosFormCategory : List ColumnInfo -> Int -> String -> List ColumnI
 updateColumnInfosFormCategory origColumnInfos columnId category =
     let
         z columnInfo =
-            { columnInfo
-                | url = columnInfo.formQuery ++ category
-            }
+            { columnInfo | url = columnInfo.formQuery ++ category }
     in
     updateColumnInfoFieldById origColumnInfos columnId z category
 
@@ -328,9 +319,7 @@ updateColumnInfosFormUrl : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormUrl origColumnInfos columnId urlArg =
     let
         z columnInfo =
-            { columnInfo
-                | url = urlArg
-            }
+            { columnInfo | url = urlArg }
     in
     updateColumnInfoFieldById origColumnInfos columnId z urlArg
 
