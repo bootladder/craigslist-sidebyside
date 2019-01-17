@@ -125,21 +125,7 @@ update msg model =
 
         LoadButtonPressed columnId ->
             ( model
-            , Http.request
-                { method = "POST"
-                , body =
-                    Http.jsonBody <|
-                        Json.Encode.object
-                            [ ( "searchURL", Json.Encode.string <| modelGetUrlFromId model columnId )
-                            , ( "columnIndex", Json.Encode.int columnId )
-                            , ( "setIndex", Json.Encode.int model.urlSetId )
-                            ]
-                , url = "http://localhost:8080/api/"
-                , expect = Http.expectJson (\result -> ReceivedQueryResults result columnId) queryDecoder
-                , headers = []
-                , timeout = Nothing
-                , tracker = Nothing
-                }
+            , httpRequestColumn (modelGetUrlFromId model columnId) columnId model.urlSetId
             )
 
         ReceivedQueryResults result columnId ->
@@ -232,14 +218,9 @@ update msg model =
 
 httpGETUrlSet : String -> Cmd Msg
 httpGETUrlSet columnId =
-    Http.request
-        { method = "GET"
-        , url = "http://localhost:8080/api/" ++ columnId
-        , body = Http.emptyBody
+    Http.get
+        { url = "http://localhost:8080/api/" ++ columnId
         , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
-        , headers = []
-        , timeout = Nothing
-        , tracker = Nothing
         }
 
 
@@ -258,9 +239,8 @@ httpJSONBodyReceivedUrlSet theMethod json =
 
 httpRequestColumn : String -> Int -> Int -> Cmd Msg
 httpRequestColumn url columnId setId =
-    Http.request
-        { method = "POST"
-        , body =
+    Http.post
+        { body =
             Http.jsonBody <|
                 Json.Encode.object
                     [ ( "searchURL", Json.Encode.string url )
@@ -269,9 +249,6 @@ httpRequestColumn url columnId setId =
                     ]
         , url = "http://localhost:8080/api/"
         , expect = Http.expectJson (\jsonResult -> ReceivedQueryResults jsonResult columnId) queryDecoder
-        , headers = []
-        , timeout = Nothing
-        , tracker = Nothing
         }
 
 
