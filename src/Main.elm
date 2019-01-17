@@ -70,15 +70,7 @@ init _ =
         ]
         0
         "dummy debug"
-    , Http.request
-        { method = "GET"
-        , url = "http://localhost:8080/api/0"
-        , body = Http.emptyBody
-        , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
-        , headers = []
-        , timeout = Nothing
-        , tracker = Nothing
-        }
+    , httpGETUrlSet "0"
     )
 
 
@@ -96,7 +88,7 @@ type Msg
     | ReceivedUrlSet (Result Http.Error (List String))
     | IncrementUrlSetNumber
     | DecrementUrlSetNumber
-    | AddColumnButtonClicked 
+    | AddColumnButtonClicked
     | DeleteButtonPressed ColumnId
 
 
@@ -197,12 +189,12 @@ update msg model =
                             }
                     in
                     ( newmodel
-                    , 
-                    
-                    let f index url = httpRequestColumn url index newmodel.urlSetId
-                    in
-                        Cmd.batch <| List.indexedMap f urlSet
-                        --Cmd.none --To disable loading all URLs after a refresh
+                    , let
+                        f index url =
+                            httpRequestColumn url index newmodel.urlSetId
+                      in
+                      Cmd.batch <| List.indexedMap f urlSet
+                      --Cmd.none --To disable loading all URLs after a refresh
                     )
 
                 Err e ->
@@ -223,15 +215,7 @@ update msg model =
                 | urlSetId = newUrlSetId
                 , debugBreadcrumb = "the model is " ++ String.fromInt newUrlSetId
               }
-            , Http.request
-                { method = "GET"
-                , url = "http://localhost:8080/api/" ++ String.fromInt newUrlSetId
-                , body = Http.emptyBody
-                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
-                , headers = []
-                , timeout = Nothing
-                , tracker = Nothing
-                }
+            , httpGETUrlSet <| String.fromInt newUrlSetId
             )
 
         IncrementUrlSetNumber ->
@@ -243,10 +227,19 @@ update msg model =
                 | urlSetId = newUrlSetId
                 , debugBreadcrumb = "the model is " ++ String.fromInt newUrlSetId
               }
+            , httpGETUrlSet <| String.fromInt newUrlSetId
+            )
+
+        AddColumnButtonClicked ->
+            ( model
             , Http.request
-                { method = "GET"
-                , url = "http://localhost:8080/api/" ++ String.fromInt newUrlSetId
-                , body = Http.emptyBody
+                { method = "PUT"
+                , url = "http://localhost:8080/api/"
+                , body =
+                    Http.jsonBody <|
+                        Json.Encode.object
+                            [ ( "setIndex", Json.Encode.int model.urlSetId )
+                            ]
                 , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
                 , headers = []
                 , timeout = Nothing
@@ -254,36 +247,36 @@ update msg model =
                 }
             )
 
-        AddColumnButtonClicked ->
-            (model, Http.request
-                { method = "PUT"
-                , url = "http://localhost:8080/api/"
-                , body = Http.jsonBody <|
-                        Json.Encode.object
-                            [ 
-                             ( "setIndex", Json.Encode.int model.urlSetId )
-                            ]
-                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
-                , headers = []
-                , timeout = Nothing
-                , tracker = Nothing
-                })
-
-        DeleteButtonPressed columnId  ->
-            (model, Http.request
+        DeleteButtonPressed columnId ->
+            ( model
+            , Http.request
                 { method = "DELETE"
                 , url = "http://localhost:8080/api/"
-                , body = Http.jsonBody <|
+                , body =
+                    Http.jsonBody <|
                         Json.Encode.object
-                            [ 
-                             ( "columnIndex", Json.Encode.int columnId )
-                             ,( "setIndex", Json.Encode.int model.urlSetId )
+                            [ ( "columnIndex", Json.Encode.int columnId )
+                            , ( "setIndex", Json.Encode.int model.urlSetId )
                             ]
                 , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
                 , headers = []
                 , timeout = Nothing
                 , tracker = Nothing
-                })
+                }
+            )
+
+
+httpGETUrlSet : String -> Cmd Msg
+httpGETUrlSet columnId =
+    Http.request
+        { method = "GET"
+        , url = "http://localhost:8080/api/" ++ columnId
+        , body = Http.emptyBody
+        , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+        , headers = []
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 httpRequestColumn : String -> Int -> Int -> Cmd Msg
@@ -442,7 +435,7 @@ topHeader urlSetId =
         []
         [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
         , urlSetView <| String.fromInt urlSetId
-        , button [ onClick AddColumnButtonClicked ] [text "Add Column"]
+        , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
         ]
 
 
