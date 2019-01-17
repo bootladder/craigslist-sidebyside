@@ -79,7 +79,8 @@ init _ =
 
 
 type Msg
-    = UrlInput ColumnId String
+    = FormInput FormInputElement ColumnId String
+    | UrlInput ColumnId String
     | SearchQueryInput ColumnId String
     | CategoryInput ColumnId String
     | CityInput ColumnId String
@@ -92,9 +93,36 @@ type Msg
     | DeleteButtonPressed ColumnId
 
 
+type FormInputElement
+    = FormUrlInput
+    | FormQueryInput
+    | FormCategoryInput
+    | FormCityInput
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        FormInput formInputElement columnId input ->
+            let
+                updateFunc p =
+                    case p of
+                        FormUrlInput ->
+                            updateColumnInfosFormUrl
+
+                        FormQueryInput ->
+                            updateColumnInfosFormQuery
+
+                        FormCategoryInput ->
+                            updateColumnInfosFormCategory
+
+                        FormCityInput ->
+                            updateColumnInfosFormCategory
+            in
+            ( updateColumnInfos (updateFunc formInputElement) model columnId input
+            , Cmd.none
+            )
+
         UrlInput columnId input ->
             ( updateColumnInfos updateColumnInfosFormUrl model columnId input
             , Cmd.none
@@ -448,9 +476,15 @@ queryColumn columnInfo =
         , Css.height (vh 90)
         ]
         []
-        [ styled input [ display block, Css.width (pct 100) ] [ placeholder "URL", value columnInfo.url, onInput (UrlInput columnInfo.id) ] []
-        , styled input [ display block, margin (px 10), Css.width (pct 50) ] [ placeholder "Search Query", onInput (SearchQueryInput columnInfo.id) ] []
-        , styled div [ display inline, margin (px 10) ] [] [ categorySelector columnInfo.id ]
+        [ styled input
+            [ display block, Css.width (pct 100) ]
+            [ placeholder "URL", value columnInfo.url, onInput (\input -> FormInput FormUrlInput columnInfo.id input) ]
+            []
+        , styled input
+            [ display block, margin (px 10), Css.width (pct 50) ]
+            [ placeholder "Search Query", onInput (\input -> FormInput FormQueryInput columnInfo.id input) ]
+            []
+        , styled div [ display inline, margin (px 10) ] [] [ categorySelector columnInfo.id (\input -> FormInput FormCategoryInput columnInfo.id input)]
         , styled div [ display inline, margin (px 10) ] [] [ citySelector ]
         , styled div
             [ displayFlex, flexDirection row, padding (px 15), justifyContent spaceBetween ]
@@ -468,9 +502,9 @@ queryResults result =
     postBody result
 
 
-categorySelector : ColumnId -> Html Msg
-categorySelector id =
-    select [ onInput (CategoryInput id) ]
+categorySelector : ColumnId -> (String -> Msg) -> Html Msg
+categorySelector id callback =
+    select [ onInput callback ] 
         [ option [] [ text "Select Category" ]
         , option [] [ text "option 2" ]
         ]
