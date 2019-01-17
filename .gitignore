@@ -2,3 +2,6 @@ main.js
 .vscode
 debug
 *.swp
+*.elmi
+*.elmo
+summary.dat
