@@ -280,12 +280,8 @@ updateColumnInfosHtml origColumnInfos columnId html =
     let
         f columnInfo =
             if columnInfo.id == columnId then
-                { id = columnInfo.id
-                , url = columnInfo.url
-                , responseHtml = html
-                , formQuery = columnInfo.formQuery
-                , formCategory = columnInfo.formCategory
-                , formCity = columnInfo.formCity
+                { columnInfo
+                    | responseHtml = html
                 }
 
             else
@@ -299,12 +295,9 @@ updateColumnInfosFormQuery origColumnInfos columnId query =
     let
         f columnInfo =
             if columnInfo.id == columnId then
-                { id = columnInfo.id
-                , url = query
-                , responseHtml = columnInfo.responseHtml
-                , formQuery = query
-                , formCategory = columnInfo.formCategory
-                , formCity = columnInfo.formCity
+                { columnInfo
+                    | url = query
+                    , formQuery = query
                 }
 
             else
@@ -318,12 +311,8 @@ updateColumnInfosFormCategory origColumnInfos columnId category =
     let
         f columnInfo =
             if columnInfo.id == columnId then
-                { id = columnInfo.id
-                , url = columnInfo.formQuery ++ category
-                , responseHtml = columnInfo.responseHtml
-                , formQuery = columnInfo.formQuery
-                , formCategory = columnInfo.formCategory
-                , formCity = columnInfo.formCity
+                { columnInfo
+                    | url = columnInfo.formQuery ++ category
                 }
 
             else
@@ -337,12 +326,8 @@ updateColumnInfosFormUrl origColumnInfos columnId urlArg =
     let
         f columnInfo =
             if columnInfo.id == columnId then
-                { id = columnInfo.id
-                , url = urlArg
-                , responseHtml = columnInfo.responseHtml
-                , formQuery = columnInfo.formQuery
-                , formCategory = columnInfo.formCategory
-                , formCity = columnInfo.formCity
+                { columnInfo
+                    | url = urlArg
                 }
 
             else
