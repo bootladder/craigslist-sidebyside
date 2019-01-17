@@ -7,11 +7,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/net/html"
 
@@ -58,6 +60,8 @@ func main() {
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath",
 		http.Dir("public"))
+	router.ServeFiles("/images/*filepath",
+		http.Dir("public/images"))
 
 	router.POST("/api/", createPostHandler(""))
 	router.GET("/api/:setIndex", getURLSet)
@@ -91,18 +95,19 @@ func parsePostRequestBody(requestBody io.Reader) craigslistPostRequest {
 	return req
 }
 
-func fetchCraigslistQuery(url string) (html string) {
+func fetchCraigslistQuery(url string) string {
 	if debug == true {
-		html =
-			`<html><body><ul><li class="result-row" data-pid="6744258112">` +
-				` Wow cool ` + url +
-				` </li></ul></body></html>`
+		return `<html><body><ul><li class="result-row" data-pid="6744258112">` +
+			` Wow cool ` + url + ` </li></ul></body></html>`
 
-	} else {
-		rawHtml := makeRequest(url)
-		html = extractCraigslistResultRows(rawHtml)
 	}
-	return
+	rawHtml, err := makeRequest(url)
+	if err != nil {
+		return `<html><body><ul><li class="result-row" data-pid="6744258112">` +
+			` ERROR: ` + err.Error() + ` : ` + url + ` </li></ul></body></html>`
+	}
+
+	return extractCraigslistResultRows(rawHtml)
 }
 
 func extractCraigslistResultRows(rawHtml string) string {
@@ -181,13 +186,23 @@ func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	returnURLSetJSONResponse(w, setIndex)
 }
 
-func makeRequest(url string) string {
-	log.Println("makeRequest: " + url)
-	resp, err := http.Get(url) //"https://httpbin.org/get"
+func makeRequest(url string) (string, error) {
+
+	log.Print("makeRequest: sleep ... ")
+	r := rand.Intn(1000)
+	time.Sleep(time.Duration(r) * time.Millisecond)
+
+	log.Printf("makeRequest: %s\n", url)
+
+	client := http.Client{
+		Timeout: time.Duration(3 * time.Second),
+	}
+	resp, err := client.Get(url) //"https://httpbin.org/get"
 
 	//gracefully handle error with invalid craigslist URL
 	if err != nil {
-		log.Fatalln(err)
+		log.Println("    TIMEOUT: " + url)
+		return "TIMEOUT", errors.New("TIMEOUT")
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -195,7 +210,7 @@ func makeRequest(url string) string {
 		log.Fatalln(err)
 	}
 
-	return string(body)
+	return string(body), nil
 }
 
 func returnURLSetJSONResponse(w http.ResponseWriter, setIndex int) {
