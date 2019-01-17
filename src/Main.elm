@@ -80,10 +80,6 @@ init _ =
 
 type Msg
     = FormInput FormInputElement ColumnId String
-    | UrlInput ColumnId String
-    | SearchQueryInput ColumnId String
-    | CategoryInput ColumnId String
-    | CityInput ColumnId String
     | LoadButtonPressed ColumnId
     | ReceivedQueryResults (Result Http.Error String) ColumnId
     | ReceivedUrlSet (Result Http.Error (List String))
@@ -117,30 +113,9 @@ update msg model =
                             updateColumnInfosFormCategory
 
                         FormCityInput ->
-                            updateColumnInfosFormCategory
+                            updateColumnInfosFormCategory --not implemented
             in
             ( updateColumnInfos (updateFunc formInputElement) model columnId input
-            , Cmd.none
-            )
-
-        UrlInput columnId input ->
-            ( updateColumnInfos updateColumnInfosFormUrl model columnId input
-            , Cmd.none
-            )
-
-        SearchQueryInput columnId input ->
-            ( updateColumnInfos updateColumnInfosFormQuery model columnId input
-            , Cmd.none
-            )
-
-        CategoryInput columnId input ->
-            ( updateColumnInfos updateColumnInfosFormCategory model columnId input
-            , Cmd.none
-            )
-
-        CityInput columnId input ->
-            ( model
-              --not implemented
             , Cmd.none
             )
 
@@ -484,7 +459,7 @@ queryColumn columnInfo =
             [ display block, margin (px 10), Css.width (pct 50) ]
             [ placeholder "Search Query", onInput (\input -> FormInput FormQueryInput columnInfo.id input) ]
             []
-        , styled div [ display inline, margin (px 10) ] [] [ categorySelector columnInfo.id (\input -> FormInput FormCategoryInput columnInfo.id input)]
+        , styled div [ display inline, margin (px 10) ] [] [ categorySelector columnInfo.id (\input -> FormInput FormCategoryInput columnInfo.id input) ]
         , styled div [ display inline, margin (px 10) ] [] [ citySelector ]
         , styled div
             [ displayFlex, flexDirection row, padding (px 15), justifyContent spaceBetween ]
@@ -504,7 +479,7 @@ queryResults result =
 
 categorySelector : ColumnId -> (String -> Msg) -> Html Msg
 categorySelector id callback =
-    select [ onInput callback ] 
+    select [ onInput callback ]
         [ option [] [ text "Select Category" ]
         , option [] [ text "option 2" ]
         ]
