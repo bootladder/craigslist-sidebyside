@@ -1,4 +1,4 @@
-module Main exposing (ColumnInfo, CraigslistHTML, Model, Msg(..), Url, categorySelector, citySelector, deleteColumnButton, init, loadRefreshButton, main, postBody, queryColumn, queryDecoder, queryGridColumnWrap, queryResults, subscriptions, update, view)
+module Main exposing (ColumnId, ColumnInfo, CraigslistHTML, FormInputElement(..), Model, Msg(..), Url, categorySelector, citySelector, deleteColumnButton, getCityFromUrl, getUrlSetDecoder, httpGETUrlSet, httpJSONBodyReceivedUrlSet, httpRequestColumn, init, listStringDecoder, loadRefreshButton, main, modelGetUrlFromId, postBody, queryColumn, queryDecoder, queryGridColumnWrap, queryResults, subscriptions, topHeader, topTable, update, updateColumnInfoFieldById, updateColumnInfosFormCategory, updateColumnInfosFormQuery, updateColumnInfosFormUrl, updateColumnInfosHtml, updateColumnInfosNewUrlSet, urlSetView, view)
 
 import Browser
 import Css exposing (..)
@@ -413,7 +413,11 @@ queryColumn columnInfo =
         , Css.height (vh 90)
         ]
         []
-        [ styled input
+        [ styled div
+            [ display block, margin (px 10), fontSize (px 30) ]
+            []
+            [ h3 [] [ text <| getCityFromUrl columnInfo.url ] ]
+        , styled input
             [ display block, Css.width (pct 100) ]
             [ placeholder "URL", value columnInfo.url, onInput (\input -> FormInput FormUrlInput columnInfo.id input) ]
             []
@@ -469,6 +473,23 @@ deleteColumnButton param =
         [ onClick (DeleteButtonPressed param)
         ]
         [ text "Delete Column" ]
+
+
+getCityFromUrl url =
+    if String.contains "http://" url then
+        let
+            a =
+                String.dropLeft 7 url |> String.split "." |> List.head
+        in
+        case a of
+            Just d ->
+                d
+
+            Nothing ->
+                "wat"
+
+    else
+        "could not parse city" ++ url
 
 
 
