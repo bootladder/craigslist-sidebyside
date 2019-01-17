@@ -96,34 +96,23 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UrlInput columnId input ->
-            ( { model
-                | debugBreadcrumb = input
-                , columnInfos = updateColumnInfosFormUrl model.columnInfos columnId input
-              }
+            ( updateColumnInfos updateColumnInfosFormUrl model columnId input
             , Cmd.none
             )
 
         SearchQueryInput columnId input ->
-            ( { model
-                | debugBreadcrumb = input
-                , columnInfos = updateColumnInfosFormQuery model.columnInfos columnId input
-              }
+            ( updateColumnInfos updateColumnInfosFormQuery model columnId input
             , Cmd.none
             )
 
         CategoryInput columnId input ->
-            ( { model
-                | debugBreadcrumb = input
-                , columnInfos = updateColumnInfosFormCategory model.columnInfos columnId input
-              }
+            ( updateColumnInfos updateColumnInfosFormCategory model columnId input
             , Cmd.none
             )
 
         CityInput columnId input ->
-            ( { model
-                | debugBreadcrumb = input
-                , columnInfos = updateColumnInfosFormQuery model.columnInfos columnId input
-              }
+            ( model
+              --not implemented
             , Cmd.none
             )
 
@@ -157,26 +146,12 @@ update msg model =
                     )
 
                 Err e ->
-                    case e of
-                        Http.BadBody s ->
-                            ( { model
-                                | columnInfos =
-                                    updateColumnInfosHtml model.columnInfos columnId <| "fail" ++ s
-                              }
-                            , Cmd.none
-                            )
-
-                        Http.BadUrl _ ->
-                            ( model, Cmd.none )
-
-                        Http.Timeout ->
-                            ( model, Cmd.none )
-
-                        Http.NetworkError ->
-                            ( model, Cmd.none )
-
-                        Http.BadStatus _ ->
-                            ( model, Cmd.none )
+                    ( { model
+                        | columnInfos =
+                            updateColumnInfosHtml model.columnInfos columnId <| "fail"
+                      }
+                    , Cmd.none
+                    )
 
         ReceivedUrlSet result ->
             case result of
@@ -232,38 +207,27 @@ update msg model =
 
         AddColumnButtonClicked ->
             ( model
-            , Http.request
-                { method = "PUT"
-                , url = "http://localhost:8080/api/"
-                , body =
-                    Http.jsonBody <|
-                        Json.Encode.object
-                            [ ( "setIndex", Json.Encode.int model.urlSetId )
-                            ]
-                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
-                , headers = []
-                , timeout = Nothing
-                , tracker = Nothing
-                }
+            , httpJSONBodyReceivedUrlSet "PUT" <|
+                Json.Encode.object
+                    [ ( "setIndex", Json.Encode.int model.urlSetId )
+                    ]
             )
 
         DeleteButtonPressed columnId ->
             ( model
-            , Http.request
-                { method = "DELETE"
-                , url = "http://localhost:8080/api/"
-                , body =
-                    Http.jsonBody <|
-                        Json.Encode.object
-                            [ ( "columnIndex", Json.Encode.int columnId )
-                            , ( "setIndex", Json.Encode.int model.urlSetId )
-                            ]
-                , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
-                , headers = []
-                , timeout = Nothing
-                , tracker = Nothing
-                }
+            , httpJSONBodyReceivedUrlSet "DELETE" <|
+                Json.Encode.object
+                    [ ( "columnIndex", Json.Encode.int columnId )
+                    , ( "setIndex", Json.Encode.int model.urlSetId )
+                    ]
             )
+
+
+updateColumnInfos f model columnId input =
+    { model
+        | debugBreadcrumb = input
+        , columnInfos = f model.columnInfos columnId input
+    }
 
 
 httpGETUrlSet : String -> Cmd Msg
@@ -272,6 +236,19 @@ httpGETUrlSet columnId =
         { method = "GET"
         , url = "http://localhost:8080/api/" ++ columnId
         , body = Http.emptyBody
+        , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+        , headers = []
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+httpJSONBodyReceivedUrlSet theMethod json =
+    Http.request
+        { method = theMethod
+        , url = "http://localhost:8080/api/"
+        , body =
+            Http.jsonBody json
         , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
         , headers = []
         , timeout = Nothing
