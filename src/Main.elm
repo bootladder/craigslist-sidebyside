@@ -113,7 +113,9 @@ update msg model =
                             updateColumnInfosFormCategory
 
                         FormCityInput ->
-                            updateColumnInfosFormCategory --not implemented
+                            updateColumnInfosFormCategory
+
+                --not implemented
             in
             ( updateColumnInfos (updateFunc formInputElement) model columnId input
             , Cmd.none
@@ -278,65 +280,59 @@ httpRequestColumn url columnId setId =
         }
 
 
-updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
-updateColumnInfosHtml origColumnInfos columnId html =
+updateColumnInfoFieldById : List ColumnInfo -> Int -> (ColumnInfo -> ColumnInfo) -> String -> List ColumnInfo
+updateColumnInfoFieldById origColumnInfos columnId updateFunc query =
     let
-        f columnInfo =
+        f g columnInfo =
             if columnInfo.id == columnId then
-                { columnInfo
-                    | responseHtml = html
-                }
+                g columnInfo
 
             else
                 columnInfo
     in
-    List.map f origColumnInfos
+    List.map (f updateFunc) origColumnInfos
+
+
+updateColumnInfosHtml : List ColumnInfo -> Int -> String -> List ColumnInfo
+updateColumnInfosHtml origColumnInfos columnId html =
+    let
+        z columnInfo =
+            { columnInfo
+                | responseHtml = html
+            }
+    in
+    updateColumnInfoFieldById origColumnInfos columnId z html
 
 
 updateColumnInfosFormQuery : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormQuery origColumnInfos columnId query =
     let
-        f columnInfo =
-            if columnInfo.id == columnId then
-                { columnInfo
-                    | url = query
-                    , formQuery = query
-                }
-
-            else
-                columnInfo
+        z columnInfo =
+            { columnInfo | url = query, formQuery = query }
     in
-    List.map f origColumnInfos
+    updateColumnInfoFieldById origColumnInfos columnId z query
 
 
 updateColumnInfosFormCategory : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormCategory origColumnInfos columnId category =
     let
-        f columnInfo =
-            if columnInfo.id == columnId then
-                { columnInfo
-                    | url = columnInfo.formQuery ++ category
-                }
-
-            else
-                columnInfo
+        z columnInfo =
+            { columnInfo
+                | url = columnInfo.formQuery ++ category
+            }
     in
-    List.map f origColumnInfos
+    updateColumnInfoFieldById origColumnInfos columnId z category
 
 
 updateColumnInfosFormUrl : List ColumnInfo -> Int -> String -> List ColumnInfo
 updateColumnInfosFormUrl origColumnInfos columnId urlArg =
     let
-        f columnInfo =
-            if columnInfo.id == columnId then
-                { columnInfo
-                    | url = urlArg
-                }
-
-            else
-                columnInfo
+        z columnInfo =
+            { columnInfo
+                | url = urlArg
+            }
     in
-    List.map f origColumnInfos
+    updateColumnInfoFieldById origColumnInfos columnId z urlArg
 
 
 updateColumnInfosNewUrlSet : List String -> List ColumnInfo
