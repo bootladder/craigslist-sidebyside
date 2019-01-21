@@ -403,30 +403,26 @@ queryGridColumnWrap columnInfo =
         [ queryColumn columnInfo ]
 
 
+queryColumnStyle =
+    [ Css.width auto
+    , padding (px 5)
+    , overflowY scroll
+    , overflowX Css.hidden
+    , Css.height (vh 90)
+    ]
+
+
 queryColumn : ColumnInfo -> Html Msg
 queryColumn columnInfo =
     styled div
-        [ Css.width auto
-        , padding (px 5)
-        , overflowY scroll
-        , overflowX Css.hidden
-        , Css.height (vh 90)
-        ]
+        queryColumnStyle
         []
-        [ styled div
-            [ display block, margin (px 10), fontSize (px 30) ]
-            []
-            [ h3 [] [ text <| getCityFromUrl columnInfo.url ] ]
-        , styled input
-            [ display block, Css.width (pct 100) ]
-            [ placeholder "URL", value columnInfo.url, onInput (\input -> FormInput FormUrlInput columnInfo.id input) ]
-            []
-        , styled input
-            [ display block, margin (px 10), Css.width (pct 50) ]
-            [ placeholder "Search Query", onInput (\input -> FormInput FormQueryInput columnInfo.id input) ]
-            []
-        , styled div [ display inline, margin (px 10) ] [] [ categorySelector columnInfo.id (\input -> FormInput FormCategoryInput columnInfo.id input) ]
-        , styled div [ display inline, margin (px 10) ] [] [ citySelector ]
+        [ labelHeader <| getCityFromUrl columnInfo.url
+        , labelHeader <| getQueryFromUrl columnInfo.url
+        , urlInput columnInfo
+        , searchQueryInput columnInfo.id
+        , categorySelector columnInfo.id
+        , citySelector
         , styled div
             [ displayFlex, flexDirection row, padding (px 15), justifyContent spaceBetween ]
             []
@@ -438,13 +434,36 @@ queryColumn columnInfo =
         ]
 
 
-queryResults : String -> Html Msg
-queryResults result =
-    postBody result
+labelHeader : String -> Html Msg
+labelHeader city =
+    styled div
+        [ display block, margin (px 10), fontSize (px 30) ]
+        []
+        [ h3 [] [ text <| city ] ]
 
 
-categorySelector : ColumnId -> (String -> Msg) -> Html Msg
-categorySelector id callback =
+urlInput : ColumnInfo -> Html Msg
+urlInput columnInfo =
+    styled input
+        [ display block, Css.width (pct 100) ]
+        [ placeholder "URL", value columnInfo.url, onInput (\input -> FormInput FormUrlInput columnInfo.id input) ]
+        []
+
+
+searchQueryInput id =
+    styled input
+        [ display block, margin (px 10), Css.width (pct 50) ]
+        [ placeholder "Search Query", onInput (\input -> FormInput FormQueryInput id input) ]
+        []
+
+
+categorySelector : ColumnId -> Html Msg
+categorySelector id =
+    styled div [ display inline, margin (px 10) ] [] [ categorySelectorHtml id (\input -> FormInput FormCategoryInput id input) ]
+
+
+categorySelectorHtml : ColumnId -> (String -> Msg) -> Html Msg
+categorySelectorHtml id callback =
     select [ onInput callback ]
         [ option [] [ text "Select Category" ]
         , option [] [ text "option 2" ]
@@ -453,10 +472,19 @@ categorySelector id callback =
 
 citySelector : Html Msg
 citySelector =
+    styled div [ display inline, margin (px 10) ] [] [ citySelectorHtml ]
+
+citySelectorHtml : Html Msg
+citySelectorHtml =
     select []
         [ option [] [ text "Select City" ]
         , option [] [ text "Birminham" ]
         ]
+
+
+queryResults : String -> Html Msg
+queryResults result =
+    postBody result
 
 
 loadRefreshButton : ColumnId -> Html Msg
@@ -490,6 +518,35 @@ getCityFromUrl url =
 
     else
         "could not parse city" ++ url
+
+getQueryFromUrl url =
+    let urlParams = String.split "?" url
+        rev = List.reverse urlParams
+        allParams = case List.head rev of 
+            Just a -> a
+            Nothing -> "fail"
+
+        params = String.split "&" allParams
+        isQueryParam s = 
+            let keyvalue = String.split "=" s
+                key = case List.head keyvalue of
+                        Just a -> a
+                        Nothing -> "nothign"
+            in key == "query"
+        queryParams = List.filter isQueryParam params
+
+        queryParam = case queryParams of
+                        [] -> "nope"
+                        [a] -> a
+                        _ -> "too many"
+
+        zeyvalue = String.split "=" queryParam
+        zey = case List.head <| List.reverse zeyvalue of
+                Just a -> a
+                Nothing -> "nope"
+        
+
+        in zey
 
 
 
