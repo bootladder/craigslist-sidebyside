@@ -36,8 +36,18 @@ type alias Url =
     String
 
 
+type alias UrlSetId =
+    Int
+
+
 type alias CraigslistHTML =
     String
+
+
+type alias UrlSet =
+    { name : String
+    , urls : List String
+    }
 
 
 type alias ColumnInfo =
@@ -52,7 +62,8 @@ type alias ColumnInfo =
 
 type alias Model =
     { columnInfos : List ColumnInfo
-    , urlSetId : Int
+    , urlSetId : UrlSetId
+    , urlSets : List UrlSet
     , debugBreadcrumb : String
     }
 
@@ -69,6 +80,9 @@ init _ =
         , { id = 1, url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
         ]
         0
+        [ { name = "my set", urls = [ "http://google.com" ] }
+        , { name = "my222t", urls = [ "http://google.com" ] }
+        ]
         "dummy debug"
     , httpGETUrlSet "0"
     )
@@ -85,6 +99,7 @@ type Msg
     | ReceivedUrlSet (Result Http.Error (List String))
     | IncrementUrlSetNumber
     | DecrementUrlSetNumber
+    | ChangeUrlSet UrlSetId
     | AddColumnButtonClicked
     | DeleteButtonPressed ColumnId
 
@@ -197,6 +212,9 @@ update msg model =
               }
             , httpGETUrlSet <| String.fromInt newUrlSetId
             )
+
+        ChangeUrlSet newUrlSetId ->
+            ( {model | urlSetId = newUrlSetId} , httpGETUrlSet <| String.fromInt newUrlSetId )
 
         AddColumnButtonClicked ->
             ( model
@@ -346,28 +364,61 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ topHeader model.urlSetId
+        [ topHeader model
+        , oldTopHeader model.urlSetId
 
         --, text model.debugBreadcrumb
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
 
-topHeader : Int -> Html Msg
-topHeader urlSetId =
+topHeader : Model -> Html Msg
+topHeader model =
     styled div
         [ displayFlex
         , Css.height (vh 5)
         ]
         []
         [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
-        , urlSetView <| String.fromInt urlSetId
+        , urlSetView <| model.urlSets
         , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
         ]
 
 
-urlSetView : String -> Html Msg
-urlSetView setNumber =
+urlSetView : List UrlSet -> Html Msg
+urlSetView sets =
+    let
+        firstSetName =
+            case List.head sets of
+                Just set ->
+                    set.name
+
+                Nothing ->
+                    "no name"
+
+        makeButton id set = button [ onClick (ChangeUrlSet id) ] [ text set.name ]
+    in
+    styled div
+        []
+        []
+        (List.indexedMap makeButton sets)
+
+
+oldTopHeader : Int -> Html Msg
+oldTopHeader urlSetId =
+    styled div
+        [ displayFlex
+        , Css.height (vh 5)
+        ]
+        []
+        [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
+        , oldUrlSetView <| String.fromInt urlSetId
+        , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
+        ]
+
+
+oldUrlSetView : String -> Html Msg
+oldUrlSetView setNumber =
     styled div
         []
         []
@@ -474,6 +525,7 @@ citySelector : Html Msg
 citySelector =
     styled div [ display inline, margin (px 10) ] [] [ citySelectorHtml ]
 
+
 citySelectorHtml : Html Msg
 citySelectorHtml =
     select []
@@ -519,34 +571,67 @@ getCityFromUrl url =
     else
         "could not parse city" ++ url
 
+
 getQueryFromUrl url =
-    let urlParams = String.split "?" url
-        rev = List.reverse urlParams
-        allParams = case List.head rev of 
-            Just a -> a
-            Nothing -> "fail"
+    let
+        urlParams =
+            String.split "?" url
 
-        params = String.split "&" allParams
-        isQueryParam s = 
-            let keyvalue = String.split "=" s
-                key = case List.head keyvalue of
-                        Just a -> a
-                        Nothing -> "nothign"
-            in key == "query"
-        queryParams = List.filter isQueryParam params
+        rev =
+            List.reverse urlParams
 
-        queryParam = case queryParams of
-                        [] -> "nope"
-                        [a] -> a
-                        _ -> "too many"
+        allParams =
+            case List.head rev of
+                Just a ->
+                    a
 
-        zeyvalue = String.split "=" queryParam
-        zey = case List.head <| List.reverse zeyvalue of
-                Just a -> a
-                Nothing -> "nope"
-        
+                Nothing ->
+                    "fail"
 
-        in zey
+        params =
+            String.split "&" allParams
+
+        isQueryParam s =
+            let
+                keyvalue =
+                    String.split "=" s
+
+                key =
+                    case List.head keyvalue of
+                        Just a ->
+                            a
+
+                        Nothing ->
+                            "nothign"
+            in
+            key == "query"
+
+        queryParams =
+            List.filter isQueryParam params
+
+        queryParam =
+            case queryParams of
+                [] ->
+                    "nope"
+
+                [ a ] ->
+                    a
+
+                _ ->
+                    "too many"
+
+        zeyvalue =
+            String.split "=" queryParam
+
+        zey =
+            case List.head <| List.reverse zeyvalue of
+                Just a ->
+                    a
+
+                Nothing ->
+                    "nope"
+    in
+    zey
 
 
 

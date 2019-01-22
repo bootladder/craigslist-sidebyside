@@ -22,7 +22,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var debug = false
+var debug = true
 
 var err error
 
@@ -184,7 +184,7 @@ func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	setIndex, err := strconv.Atoi(setIndexString)
 	fatal(err)
 
-	if len(urlstore.urlsets) > (setIndex + 1) {
+	if len(urlstore.urlsets) < (setIndex + 1) {
 		urlstore.addNewURLSet()
 	}
 
