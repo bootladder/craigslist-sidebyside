@@ -183,6 +183,11 @@ func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	setIndexString := ps.ByName("setIndex")
 	setIndex, err := strconv.Atoi(setIndexString)
 	fatal(err)
+
+	if len(urlstore.urlsets) > (setIndex + 1) {
+		urlstore.addNewURLSet()
+	}
+
 	returnURLSetJSONResponse(w, setIndex)
 }
 

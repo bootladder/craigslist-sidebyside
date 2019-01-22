@@ -45,5 +45,9 @@ func (s *urlStore) addURL(setIndex int) {
 	s.saveURLSetsToFile()
 }
 
+func (s *urlStore) addNewURLSet() {
+	s.urlsets = append(s.urlsets, make([]string, 0))
+}
+
 func (s *urlStore) touch(filename string) {
 }
