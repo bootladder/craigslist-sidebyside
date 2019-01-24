@@ -65,6 +65,7 @@ func main() {
 
 	router.POST("/api/", createPostHandler(""))
 	router.GET("/api/:setIndex", getURLSet)
+	router.GET("/api/", getAllURLSetNames)
 	router.DELETE("/api/", createDeleteHandler(""))
 	router.PUT("/api/", createPutHandler(""))
 
@@ -189,6 +190,18 @@ func getURLSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	returnURLSetJSONResponse(w, setIndex)
+}
+
+func getAllURLSetNames(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	var names []string = urlstore.getAllURLSetNames()
+
+	jsonOut, err := json.MarshalIndent(names, "", "  ")
+	fatal(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonOut)
 }
 
 func makeRequest(url string) (string, error) {

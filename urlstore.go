@@ -49,5 +49,11 @@ func (s *urlStore) addNewURLSet() {
 	s.urlsets = append(s.urlsets, make([]string, 0))
 }
 
+func (s *urlStore) getAllURLSetNames() []string {
+
+	var names = []string{"hello", "hello2", "hello3"}
+	return names
+}
+
 func (s *urlStore) touch(filename string) {
 }

@@ -44,11 +44,6 @@ type alias CraigslistHTML =
     String
 
 
-type alias UrlSet =
-    { name : String
-    , urls : List String
-    }
-
 
 type alias ColumnInfo =
     { id : Int
@@ -63,7 +58,7 @@ type alias ColumnInfo =
 type alias Model =
     { columnInfos : List ColumnInfo
     , urlSetId : UrlSetId
-    , urlSets : List UrlSet
+    , urlSetNames : List String
     , debugBreadcrumb : String
     }
 
@@ -80,11 +75,10 @@ init _ =
         , { id = 1, url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
         ]
         0
-        [ { name = "my set", urls = [ "http://google.com" ] }
-        , { name = "my222t", urls = [ "http://google.com" ] }
+        [ "a","b"
         ]
         "dummy debug"
-    , httpGETUrlSet "0"
+    , httpGETAllUrlSetNames
     )
 
 
@@ -97,6 +91,7 @@ type Msg
     | LoadButtonPressed ColumnId
     | ReceivedQueryResults (Result Http.Error String) ColumnId
     | ReceivedUrlSet (Result Http.Error (List String))
+    | ReceivedAllUrlSetNames (Result Http.Error (List String))
     | IncrementUrlSetNumber
     | DecrementUrlSetNumber
     | ChangeUrlSet UrlSetId
@@ -185,6 +180,14 @@ update msg model =
                     , Cmd.none
                     )
 
+        ReceivedAllUrlSetNames result ->
+            case result of
+                Ok allUrlSetNames -> ( {model | urlSetNames = allUrlSetNames }, httpGETUrlSet "0")
+                Err e ->
+                    ( { model | debugBreadcrumb = "hellofail!!!" }
+                    , Cmd.none 
+                    )
+
         DecrementUrlSetNumber ->
             let
                 newUrlSetId =
@@ -214,7 +217,7 @@ update msg model =
             )
 
         ChangeUrlSet newUrlSetId ->
-            ( {model | urlSetId = newUrlSetId} , httpGETUrlSet <| String.fromInt newUrlSetId )
+            ( { model | urlSetId = newUrlSetId }, httpGETUrlSet <| String.fromInt newUrlSetId )
 
         AddColumnButtonClicked ->
             ( model
@@ -235,10 +238,18 @@ update msg model =
 
 
 httpGETUrlSet : String -> Cmd Msg
-httpGETUrlSet columnId =
+httpGETUrlSet urlSetId =
     Http.get
-        { url = "http://localhost:8080/api/" ++ columnId
+        { url = "http://localhost:8080/api/" ++ urlSetId
         , expect = Http.expectJson ReceivedUrlSet getUrlSetDecoder
+        }
+
+
+httpGETAllUrlSetNames : Cmd Msg
+httpGETAllUrlSetNames =
+    Http.get
+        { url = "http://localhost:8080/api/"
+        , expect = Http.expectJson ReceivedAllUrlSetNames getAllUrlSetNamesDecoder
         }
 
 
@@ -367,7 +378,7 @@ view model =
         [ topHeader model
         , oldTopHeader model.urlSetId
 
-        --, text model.debugBreadcrumb
+        , text model.debugBreadcrumb
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
@@ -380,28 +391,29 @@ topHeader model =
         ]
         []
         [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
-        , urlSetView <| model.urlSets
+        , urlSetView <| model.urlSetNames
         , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
         ]
 
 
-urlSetView : List UrlSet -> Html Msg
-urlSetView sets =
+urlSetView : List String -> Html Msg
+urlSetView setNames =
     let
         firstSetName =
-            case List.head sets of
+            case List.head setNames of
                 Just set ->
-                    set.name
+                    set
 
                 Nothing ->
                     "no name"
 
-        makeButton id set = button [ onClick (ChangeUrlSet id) ] [ text set.name ]
+        makeButton id setName =
+            button [ onClick (ChangeUrlSet id) ] [ text setName ]
     in
     styled div
         []
         []
-        (List.indexedMap makeButton sets)
+        (List.indexedMap makeButton setNames)
 
 
 oldTopHeader : Int -> Html Msg
@@ -660,7 +672,10 @@ getUrlSetDecoder : Decoder (List String)
 getUrlSetDecoder =
     field "urls" listStringDecoder
 
-
 listStringDecoder : Decoder (List String)
 listStringDecoder =
     Json.Decode.list Json.Decode.string
+
+getAllUrlSetNamesDecoder : Decoder (List String)
+getAllUrlSetNamesDecoder =
+    listStringDecoder
