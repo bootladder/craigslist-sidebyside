@@ -44,7 +44,6 @@ type alias CraigslistHTML =
     String
 
 
-
 type alias ColumnInfo =
     { id : Int
     , url : String
@@ -75,7 +74,8 @@ init _ =
         , { id = 1, url = "hardUrl1", responseHtml = "result1", formQuery = "", formCategory = "", formCity = "" }
         ]
         0
-        [ "a","b"
+        [ "a"
+        , "b"
         ]
         "dummy debug"
     , httpGETAllUrlSetNames
@@ -182,10 +182,12 @@ update msg model =
 
         ReceivedAllUrlSetNames result ->
             case result of
-                Ok allUrlSetNames -> ( {model | urlSetNames = allUrlSetNames }, httpGETUrlSet "0")
+                Ok allUrlSetNames ->
+                    ( { model | urlSetNames = allUrlSetNames }, httpGETUrlSet "0" )
+
                 Err e ->
                     ( { model | debugBreadcrumb = "hellofail!!!" }
-                    , Cmd.none 
+                    , Cmd.none
                     )
 
         DecrementUrlSetNumber ->
@@ -376,9 +378,8 @@ view : Model -> Html Msg
 view model =
     div []
         [ topHeader model
-        , oldTopHeader model.urlSetId
 
-        , text model.debugBreadcrumb
+        --        , text model.debugBreadcrumb
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
@@ -387,57 +388,24 @@ topHeader : Model -> Html Msg
 topHeader model =
     styled div
         [ displayFlex
-        , Css.height (vh 5)
         ]
         []
         [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
-        , urlSetView <| model.urlSetNames
+        , urlSetView
         , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
         ]
 
 
-urlSetView : List String -> Html Msg
-urlSetView setNames =
+urlSetView : Html Msg
+urlSetView =
     let
-        firstSetName =
-            case List.head setNames of
-                Just set ->
-                    set
-
-                Nothing ->
-                    "no name"
-
-        makeButton id setName =
-            button [ onClick (ChangeUrlSet id) ] [ text setName ]
+        makeButton id =
+            button [ onClick (ChangeUrlSet id) ] [ text <| "Set #" ++ String.fromInt id ]
     in
     styled div
         []
         []
-        (List.indexedMap makeButton setNames)
-
-
-oldTopHeader : Int -> Html Msg
-oldTopHeader urlSetId =
-    styled div
-        [ displayFlex
-        , Css.height (vh 5)
-        ]
-        []
-        [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
-        , oldUrlSetView <| String.fromInt urlSetId
-        , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
-        ]
-
-
-oldUrlSetView : String -> Html Msg
-oldUrlSetView setNumber =
-    styled div
-        []
-        []
-        [ button [ onClick DecrementUrlSetNumber ] [ text "-" ]
-        , styled input [ textAlign center ] [ placeholder "URL SET", value setNumber ] []
-        , button [ onClick IncrementUrlSetNumber ] [ text "+" ]
-        ]
+        (List.map makeButton <| List.range 1 10)
 
 
 topTable : List (Attribute msg) -> List (Html msg) -> Html msg
@@ -672,9 +640,11 @@ getUrlSetDecoder : Decoder (List String)
 getUrlSetDecoder =
     field "urls" listStringDecoder
 
+
 listStringDecoder : Decoder (List String)
 listStringDecoder =
     Json.Decode.list Json.Decode.string
+
 
 getAllUrlSetNamesDecoder : Decoder (List String)
 getAllUrlSetNamesDecoder =
