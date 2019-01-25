@@ -59,6 +59,8 @@ type alias Model =
     { columnInfos : List ColumnInfo
     , urlSetId : UrlSetId
     , urlSetNames : List String
+    , urlSetViewMode : UrlSetViewMode
+    , renameInput : String
     , debugBreadcrumb : String
     }
 
@@ -78,6 +80,8 @@ init _ =
         [ "a"
         , "b"
         ]
+        (UrlSetViewDropdown [] 0)
+        ""
         "dummy debug"
     , httpGETAllUrlSetNames
     )
@@ -93,10 +97,11 @@ type Msg
     | ReceivedQueryResults (Result Http.Error String) ColumnId
     | ReceivedUrlSet (Result Http.Error (List String))
     | ReceivedAllUrlSetNames (Result Http.Error (List String))
-    | RenameUrlSet UrlSetId
+    | RenameUrlSet RenameUrlSetMsg
     | SelectUrlSet String
     | AddColumnButtonClicked
     | DeleteButtonPressed ColumnId
+    | HttpNoop (Result Http.Error ())
 
 
 type FormInputElement
@@ -104,6 +109,13 @@ type FormInputElement
     | FormQueryInput
     | FormCategoryInput
     | FormCityInput
+
+
+type RenameUrlSetMsg
+    = RenameSubmit UrlSetId
+    | RenameCancel UrlSetId
+    | RenameEnable UrlSetId
+    | RenameOnInput String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -183,19 +195,46 @@ update msg model =
         ReceivedAllUrlSetNames result ->
             case result of
                 Ok allUrlSetNames ->
-                    ( { model | urlSetNames = allUrlSetNames }, httpGETUrlSet "0" )
+                    ( { model
+                        | urlSetNames = allUrlSetNames
+                        , urlSetViewMode = UrlSetViewDropdown allUrlSetNames model.urlSetId
+                      }
+                    , httpGETUrlSet <| String.fromInt model.urlSetId
+                    )
 
                 Err e ->
                     ( { model | debugBreadcrumb = "hellofail!!!" }
                     , Cmd.none
                     )
 
-        RenameUrlSet id ->
-            ( { model
-                | debugBreadcrumb = String.fromInt id
-              }
-            , Cmd.none
-            )
+        RenameUrlSet renameMsg ->
+            case renameMsg of
+                RenameSubmit id ->
+                    ( { model
+                        | debugBreadcrumb = String.fromInt id
+                        , urlSetViewMode = UrlSetViewDropdown model.urlSetNames id
+                      }
+                    , httpUpdateURLSetName id model.renameInput
+                    )
+
+                RenameCancel id ->
+                    ( { model
+                        | debugBreadcrumb = String.fromInt id
+                        , urlSetViewMode = UrlSetViewDropdown model.urlSetNames id
+                      }
+                    , Cmd.none
+                    )
+
+                RenameEnable id ->
+                    ( { model
+                        | debugBreadcrumb = String.fromInt id
+                        , urlSetViewMode = UrlSetViewRename id
+                      }
+                    , Cmd.none
+                    )
+
+                RenameOnInput input ->
+                    ( { model | renameInput = input }, Cmd.none )
 
         SelectUrlSet urlSetName ->
             let
@@ -205,11 +244,12 @@ update msg model =
                             a
 
                         Nothing ->
-                            0
+                            9000
             in
             ( { model
                 | debugBreadcrumb = urlSetName
                 , urlSetId = newUrlSetId
+                , urlSetViewMode = UrlSetViewDropdown model.urlSetNames newUrlSetId
               }
             , httpGETUrlSet <| String.fromInt newUrlSetId
             )
@@ -231,6 +271,9 @@ update msg model =
                     ]
             )
 
+        HttpNoop noop ->
+            ( model, Cmd.none )
+
 
 httpGETUrlSet : String -> Cmd Msg
 httpGETUrlSet urlSetId =
@@ -245,6 +288,22 @@ httpGETAllUrlSetNames =
     Http.get
         { url = "http://localhost:8080/api/"
         , expect = Http.expectJson ReceivedAllUrlSetNames getAllUrlSetNamesDecoder
+        }
+
+
+httpUpdateURLSetName urlSetId newName =
+    Http.request
+        { method = "POST"
+        , url = "http://localhost:8080/api/" ++ String.fromInt urlSetId
+        , body =
+            Http.jsonBody <|
+                Json.Encode.object
+                    [ ( "name", Json.Encode.string newName )
+                    ]
+        , expect = Http.expectJson ReceivedAllUrlSetNames getAllUrlSetNamesDecoder
+        , headers = []
+        , timeout = Nothing
+        , tracker = Nothing
         }
 
 
@@ -369,6 +428,7 @@ subscriptions model =
 
 type UrlSetViewMode
     = UrlSetViewDropdown (List String) UrlSetId
+    | UrlSetViewRename UrlSetId
 
 
 view : Model -> Html Msg
@@ -387,25 +447,40 @@ topHeader model =
         ]
         []
         [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
-        , urlSetView (UrlSetViewDropdown model.urlSetNames model.urlSetId)
+        , urlSetView model.urlSetViewMode
         , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
         ]
 
 
 urlSetView : UrlSetViewMode -> Html Msg
 urlSetView mode =
-    case mode of
-        UrlSetViewDropdown urlSetNames selectedUrlSetId ->
-            let
-                makeOption name =
-                    option [] [ text name ]
-            in
-            styled div
-                []
-                []
-                [ select [ onInput SelectUrlSet ] (List.map makeOption urlSetNames)
-                , button [ onClick (RenameUrlSet selectedUrlSetId) ] [ text "Rename Set" ]
-                ]
+    let
+        insideView =
+            case mode of
+                UrlSetViewDropdown urlSetNames selectedUrlSetId ->
+                    let
+                        makeOption index name selectedIndex =
+                            case index == selectedIndex of
+                                True ->
+                                    option [ selected True ] [ text name ]
+
+                                False ->
+                                    option [ selected False ] [ text name ]
+                    in
+                    [ select [ onInput SelectUrlSet ] (List.indexedMap (\index name -> makeOption index name selectedUrlSetId) urlSetNames)
+                    , button [ onClick (RenameUrlSet <| RenameEnable selectedUrlSetId) ] [ text "Rename Set" ]
+                    ]
+
+                UrlSetViewRename id ->
+                    [ input [ onInput (\x -> RenameUrlSet <| RenameOnInput x) ] []
+                    , button [ onClick (RenameUrlSet <| RenameSubmit id) ] [ text "OK" ]
+                    , button [ onClick (RenameUrlSet <| RenameCancel id) ] [ text "Cancel" ]
+                    ]
+    in
+    styled div
+        []
+        []
+        insideView
 
 
 topTable : List (Attribute msg) -> List (Html msg) -> Html msg
