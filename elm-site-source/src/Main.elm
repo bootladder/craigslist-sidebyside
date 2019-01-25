@@ -9,6 +9,7 @@ import Html.Styled.Events exposing (..)
 import Http
 import Json.Decode exposing (Decoder, field, list, string)
 import Json.Encode exposing (..)
+import List.Extra exposing (elemIndex)
 
 
 
@@ -92,9 +93,8 @@ type Msg
     | ReceivedQueryResults (Result Http.Error String) ColumnId
     | ReceivedUrlSet (Result Http.Error (List String))
     | ReceivedAllUrlSetNames (Result Http.Error (List String))
-    | IncrementUrlSetNumber
-    | DecrementUrlSetNumber
-    | ChangeUrlSet UrlSetId
+    | RenameUrlSet UrlSetId
+    | SelectUrlSet String
     | AddColumnButtonClicked
     | DeleteButtonPressed ColumnId
 
@@ -190,36 +190,29 @@ update msg model =
                     , Cmd.none
                     )
 
-        DecrementUrlSetNumber ->
+        RenameUrlSet id ->
+            ( { model
+                | debugBreadcrumb = String.fromInt id
+              }
+            , Cmd.none
+            )
+
+        SelectUrlSet urlSetName ->
             let
                 newUrlSetId =
-                    if model.urlSetId == 0 then
-                        0
+                    case elemIndex urlSetName model.urlSetNames of
+                        Just a ->
+                            a
 
-                    else
-                        model.urlSetId - 1
+                        Nothing ->
+                            0
             in
             ( { model
-                | urlSetId = newUrlSetId
-                , debugBreadcrumb = "the model is " ++ String.fromInt newUrlSetId
+                | debugBreadcrumb = urlSetName
+                , urlSetId = newUrlSetId
               }
             , httpGETUrlSet <| String.fromInt newUrlSetId
             )
-
-        IncrementUrlSetNumber ->
-            let
-                newUrlSetId =
-                    model.urlSetId + 1
-            in
-            ( { model
-                | urlSetId = newUrlSetId
-                , debugBreadcrumb = "the model is " ++ String.fromInt newUrlSetId
-              }
-            , httpGETUrlSet <| String.fromInt newUrlSetId
-            )
-
-        ChangeUrlSet newUrlSetId ->
-            ( { model | urlSetId = newUrlSetId }, httpGETUrlSet <| String.fromInt newUrlSetId )
 
         AddColumnButtonClicked ->
             ( model
@@ -374,12 +367,15 @@ subscriptions model =
 -- VIEW
 
 
+type UrlSetViewMode
+    = UrlSetViewDropdown (List String) UrlSetId
+
+
 view : Model -> Html Msg
 view model =
     div []
         [ topHeader model
-
-        --        , text model.debugBreadcrumb
+        , text model.debugBreadcrumb
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
@@ -391,21 +387,25 @@ topHeader model =
         ]
         []
         [ styled h1 [ margin (px 20) ] [] [ text "Craigslist Side-by-Side" ]
-        , urlSetView
+        , urlSetView (UrlSetViewDropdown model.urlSetNames model.urlSetId)
         , button [ onClick AddColumnButtonClicked ] [ text "Add Column" ]
         ]
 
 
-urlSetView : Html Msg
-urlSetView =
-    let
-        makeButton id =
-            button [ onClick (ChangeUrlSet id) ] [ text <| "Set #" ++ String.fromInt id ]
-    in
-    styled div
-        []
-        []
-        (List.map makeButton <| List.range 1 10)
+urlSetView : UrlSetViewMode -> Html Msg
+urlSetView mode =
+    case mode of
+        UrlSetViewDropdown urlSetNames selectedUrlSetId ->
+            let
+                makeOption name =
+                    option [] [ text name ]
+            in
+            styled div
+                []
+                []
+                [ select [ onInput SelectUrlSet ] (List.map makeOption urlSetNames)
+                , button [ onClick (RenameUrlSet selectedUrlSetId) ] [ text "Rename Set" ]
+                ]
 
 
 topTable : List (Attribute msg) -> List (Html msg) -> Html msg
