@@ -44,8 +44,9 @@ type craigslistDeleteRequest struct {
 type craigslistAddRequest struct {
 	SetIndex int `json:"setIndex"`
 }
-type craigslistGetRequest struct {
-	SetIndex int `json:"setIndex"`
+type craigslistUpdateURLSetNameRequest struct {
+	SetIndex int    `json:"setIndex"`
+	Name     string `json:"name"`
 }
 type returnURLSetResponse struct {
 	Urls []string `json:"urls"`
@@ -62,11 +63,12 @@ func main() {
 	router.ServeFiles("/images/*filepath",
 		http.Dir("public/images"))
 
-	router.POST("/api/", createPostHandler(""))
+	router.POST("/api/", makeCraigslistRequest)
 	router.GET("/api/:setIndex", getURLSet)
 	router.GET("/api/", getAllURLSetNames)
-	router.DELETE("/api/", createDeleteHandler(""))
-	router.PUT("/api/", createPutHandler(""))
+	router.POST("/api/:setIndex", updateURLSetName)
+	router.DELETE("/api/", deleteURL)
+	router.PUT("/api/", addURLToSet)
 
 	if debug == false {
 		browser.OpenURL("http://localhost:8080/static/index.html")
@@ -74,7 +76,7 @@ func main() {
 	http.ListenAndServe(":8080", router)
 }
 
-func postNoteHandler(w http.ResponseWriter, r *http.Request) {
+func makeCraigslistRequest(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var req craigslistPostRequest = parsePostRequestBody(r.Body)
 
@@ -160,7 +162,7 @@ func writePostResponse(w http.ResponseWriter,
 	w.Write(jsonOut)
 }
 
-func deleteHandler(w http.ResponseWriter, r *http.Request) {
+func deleteURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var req craigslistDeleteRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -172,7 +174,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	returnURLSetJSONResponse(w, req.SetIndex)
 }
 
-func putHandler(w http.ResponseWriter, r *http.Request) {
+func addURLToSet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var req craigslistAddRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -205,6 +207,20 @@ func getAllURLSetNames(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(jsonOut)
+}
+
+func updateURLSetName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	setIndexString := ps.ByName("setIndex")
+	setIndex, err := strconv.Atoi(setIndexString)
+	fatal(err)
+
+	var req craigslistUpdateURLSetNameRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	fatal(err, "JSON Decode Put Handler Body")
+
+	urlstore.updateURLSetName(setIndex, req.Name)
+
+	getAllURLSetNames(w, r, ps)
 }
 
 func makeRequest(url string) (string, error) {
@@ -259,24 +275,6 @@ func fatal(err error, msgs ...string) {
 
 func printf(s string, a ...interface{}) {
 	fmt.Printf(s, a...)
-}
-
-func createPostHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		postNoteHandler(w, r)
-	}
-}
-
-func createDeleteHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		deleteHandler(w, r)
-	}
-}
-
-func createPutHandler(msg string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		putHandler(w, r)
-	}
 }
 
 var external = externalFuncs{}

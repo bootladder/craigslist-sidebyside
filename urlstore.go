@@ -64,5 +64,12 @@ func (s *urlStore) getAllURLSetNames() []string {
 	return names
 }
 
+func (s *urlStore) updateURLSetName(setIndex int, name string) error {
+
+	s.urlsets[setIndex].Name = name
+	s.saveURLSetsToFile()
+	return nil
+}
+
 func (s *urlStore) touch(filename string) {
 }
