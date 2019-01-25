@@ -9,7 +9,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -80,7 +79,7 @@ func postNoteHandler(w http.ResponseWriter, r *http.Request) {
 	var resp craigslistPostResponse
 	resp.ResponseHTML = fetchCraigslistQuery(req.SearchURL)
 	urlstore.setURLAt(req.SetIndex, req.ColumnIndex, req.SearchURL)
-	resp.Urls = urlstore.urlsets[req.SetIndex]
+	resp.Urls = urlstore.urlsets[req.SetIndex].Urls
 
 	writePostResponse(w, resp)
 }
@@ -90,7 +89,8 @@ func parsePostRequestBody(requestBody io.Reader) craigslistPostRequest {
 	err := json.NewDecoder(requestBody).Decode(&req)
 	fatal(err)
 
-	req.SearchURL, err = url.QueryUnescape(req.SearchURL)
+	fmt.Println("The Search Url is \n\n\n\n" + req.SearchURL)
+	//req.SearchURL, err = url.QueryUnescape(req.SearchURL)
 	fatal(err)
 
 	return req
@@ -103,6 +103,7 @@ func fetchCraigslistQuery(url string) string {
 
 	}
 	rawHtml, err := makeRequest(url)
+
 	if err != nil {
 		return `<html><body><ul><li class="result-row" data-pid="6744258112">` +
 			` ERROR: ` + err.Error() + ` : ` + url + ` </li></ul></body></html>`
@@ -233,7 +234,7 @@ func makeRequest(url string) (string, error) {
 
 func returnURLSetJSONResponse(w http.ResponseWriter, setIndex int) {
 	var resp returnURLSetResponse
-	resp.Urls = urlstore.urlsets[setIndex]
+	resp.Urls = urlstore.urlsets[setIndex].Urls
 
 	jsonOut, err := json.MarshalIndent(resp, "", "  ")
 	fatal(err)

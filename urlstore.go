@@ -8,7 +8,12 @@ import (
 
 type urlStore struct {
 	reader  io.Reader
-	urlsets [][]string
+	urlsets []urlSet
+}
+
+type urlSet struct {
+	Name string   `json:"name"`
+	Urls []string `json:"urls"`
 }
 
 var pathToUrls = "/home/steve/craigslisturls.json"
@@ -20,12 +25,13 @@ func (s *urlStore) loadURLs() error {
 	}
 
 	err = json.Unmarshal(bytes, &s.urlsets)
+
 	fmt.Printf("parseURLsFile: %v\n", s.urlsets)
 	return err
 }
 
 func (s *urlStore) setURLAt(setIndex, urlIndex int, url string) {
-	s.urlsets[setIndex][urlIndex] = url
+	s.urlsets[setIndex].Urls[urlIndex] = url
 	s.saveURLSetsToFile()
 }
 
@@ -35,18 +41,18 @@ func (s *urlStore) saveURLSetsToFile() {
 }
 
 func (s *urlStore) deleteURLAt(setIndex, urlIndex int) {
-	set := s.urlsets[setIndex]
-	set = append(set[:urlIndex], set[(urlIndex+1):]...)
-	s.urlsets[setIndex] = set
+	urls := s.urlsets[setIndex].Urls
+	urls = append(urls[:urlIndex], urls[(urlIndex+1):]...)
+	s.urlsets[setIndex].Urls = urls
 	s.saveURLSetsToFile()
 }
 func (s *urlStore) addURL(setIndex int) {
-	s.urlsets[setIndex] = append(s.urlsets[setIndex], "http://boston.craigslist.org/search/jjj/?sort=date&query=engineer")
+	s.urlsets[setIndex].Urls = append(s.urlsets[setIndex].Urls, "http://boston.craigslist.org/search/jjj/?sort=date&query=engineer")
 	s.saveURLSetsToFile()
 }
 
 func (s *urlStore) addNewURLSet() {
-	s.urlsets = append(s.urlsets, make([]string, 0))
+	s.urlsets = append(s.urlsets, urlSet{})
 }
 
 func (s *urlStore) getAllURLSetNames() []string {
