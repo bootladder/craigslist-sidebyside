@@ -68,7 +68,9 @@ func main() {
 	router.DELETE("/api/", createDeleteHandler(""))
 	router.PUT("/api/", createPutHandler(""))
 
-	browser.OpenURL("http://localhost:8080/static/index.html")
+	if debug == false {
+		browser.OpenURL("http://localhost:8080/static/index.html")
+	}
 	http.ListenAndServe(":8080", router)
 }
 

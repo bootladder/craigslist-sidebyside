@@ -57,7 +57,10 @@ func (s *urlStore) addNewURLSet() {
 
 func (s *urlStore) getAllURLSetNames() []string {
 
-	var names = []string{"hello", "hello2", "hello3"}
+	var names = []string{}
+	for _, urlset := range s.urlsets {
+		names = append(names, urlset.Name)
+	}
 	return names
 }
 

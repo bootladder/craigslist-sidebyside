@@ -139,6 +139,20 @@ func Test_addURL_addsToArray_andCallsSave(t *testing.T) {
 	assert.Equal(t, mockwritefileBytes, jsonBytes)
 }
 
+func Test_getAllURLSetNames_works(t *testing.T) {
+
+	var urlstore urlStore
+	urlstore.urlsets = []urlSet{
+		{"set1", []string{"orig1"}},
+		{"set2", []string{"orig1", "orig2"}},
+	}
+
+	actualSets := urlstore.getAllURLSetNames()
+
+	expectedNames := []string{"set1", "set2"}
+	assert.Equal(t, expectedNames, actualSets)
+}
+
 /////////////////////////////////////////////
 var mockreadfileBytes []byte
 var mockreadfileError error
