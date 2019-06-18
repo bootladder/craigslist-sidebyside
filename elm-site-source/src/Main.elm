@@ -45,6 +45,11 @@ type alias CraigslistHTML =
     String
 
 
+type UrlSetViewMode
+    = UrlSetViewDropdown (List String) UrlSetId
+    | UrlSetViewRename UrlSetId
+
+
 type alias ColumnInfo =
     { id : Int
     , url : String
@@ -101,7 +106,6 @@ type Msg
     | SelectUrlSet String
     | AddColumnButtonClicked
     | DeleteButtonPressed ColumnId
-    | HttpNoop (Result Http.Error ())
 
 
 type FormInputElement
@@ -271,9 +275,6 @@ update msg model =
                     ]
             )
 
-        HttpNoop noop ->
-            ( model, Cmd.none )
-
 
 httpGETUrlSet : String -> Cmd Msg
 httpGETUrlSet urlSetId =
@@ -426,16 +427,12 @@ subscriptions model =
 -- VIEW
 
 
-type UrlSetViewMode
-    = UrlSetViewDropdown (List String) UrlSetId
-    | UrlSetViewRename UrlSetId
-
-
 view : Model -> Html Msg
 view model =
     div []
         [ topHeader model
-        , text model.debugBreadcrumb
+
+        --  , text model.debugBreadcrumb  --SHOW DEBUG INFO
         , topTable [] <| List.map queryGridColumnWrap model.columnInfos
         ]
 
