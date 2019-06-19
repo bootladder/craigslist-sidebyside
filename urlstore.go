@@ -16,7 +16,7 @@ type urlSet struct {
 	Urls []string `json:"urls"`
 }
 
-var pathToUrls = "/home/steve/craigslisturls.json"
+var pathToUrls = "./craigslisturls.json"
 
 func (s *urlStore) loadURLs() error {
 	bytes, err := external.readfile(pathToUrls)

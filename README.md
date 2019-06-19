@@ -13,3 +13,7 @@ I could probably think of more features for this.
 The whole point of this is to show multiple searches side-by-side, which `liferea` doesn't do.
   
 # Usage
+`docker-compose up` should do the trick  
+Point your browser to `localhost:8080/static`
+  
+The form buttons and inputs don't work... at the moment just edit the URLs by hand.

@@ -1,0 +1,21 @@
+[
+  {
+    "name": "URL Set 1",
+    "urls": [
+      "http://sfbay.craigslist.org/search/jjj/?sort=date\u0026query=carpenter",
+      "http://sandiego.craigslist.org/search/jjj/?sort=date\u0026query=carpenter"
+    ]
+  },
+  {
+    "name": "Cool Set 2",
+    "urls": [
+      "http://seattle.craigslist.org/search/jjj/?sort=date\u0026query=carpenter"
+    ]
+  },
+  {
+    "name": "Yay another one",
+    "urls": [
+      "http://newyork.craigslist.org/search/jjj/?sort=date\u0026query=carpenter"
+    ]
+  }
+]

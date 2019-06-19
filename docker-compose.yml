@@ -1,0 +1,11 @@
+version: '2'
+services:
+  craigslist-sidebyside:
+    container_name: craigslist-sidebyside
+    build: .
+    ports: 
+      - "8080:8080"
+    volumes:
+      - ./:/go/src/github.com/bootladder/craigslist-sidebyside
+
+
